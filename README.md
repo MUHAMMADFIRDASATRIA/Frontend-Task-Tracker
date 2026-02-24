@@ -1,42 +1,82 @@
-# frontend
+# Task Tracker Frontend
 
-This template should help get you started developing with Vue 3 in Vite.
+Frontend aplikasi Task Tracker berbasis Vue 3 untuk mengelola proyek dan task dengan UI modern.
 
-## Recommended IDE Setup
+## ✨ Highlights
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+- Authentication flow (login/register)
+- Dashboard, daftar proyek, dan detail task
+- Create/Edit Project dan Create/Edit Task
+- Profile management
+- Responsive layout dengan Vue component architecture
 
-## Recommended Browser Setup
+## 🧰 Tech Stack
 
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
+- Vue 3 + TypeScript
+- Vue Router
+- Pinia
+- Axios
+- Vite
+- Tailwind CSS + PostCSS
 
-## Type Support for `.vue` Imports in TS
+## 📦 Requirements
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+- Node.js `^20.19.0` atau `>=22.12.0`
+- npm (disarankan versi terbaru)
 
-## Customize configuration
+## 🚀 Getting Started
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+1. Install dependencies
 
-## Project Setup
-
-```sh
+```bash
 npm install
 ```
 
-### Compile and Hot-Reload for Development
+2. Jalankan development server
 
-```sh
+```bash
 npm run dev
 ```
 
-### Type-Check, Compile and Minify for Production
+3. Buka URL yang muncul di terminal (biasanya `http://localhost:5173`)
 
-```sh
-npm run build
+## 🧪 Available Scripts
+
+- `npm run dev` → menjalankan app di mode development
+- `npm run build` → type-check lalu build production
+- `npm run build-only` → build production tanpa type-check terpisah
+- `npm run type-check` → cek TypeScript dengan `vue-tsc`
+- `npm run preview` → preview hasil build production
+- `npm run format` → format kode pada folder `src`
+
+## 🗂️ Struktur Folder (Ringkas)
+
+```text
+frontend/
+├─ public/
+├─ src/
+│  ├─ components/
+│  ├─ composables/
+│  ├─ router/
+│  ├─ services/
+│  ├─ stores/
+│  └─ views/
+├─ index.html
+├─ package.json
+└─ vite.config.ts
 ```
+
+## 🔌 Backend API
+
+Project ini terhubung ke backend Laravel (`TaskTracker`) melalui Axios di layer `services`/`composables`.
+Pastikan backend berjalan dan endpoint API sudah sesuai sebelum testing flow create/edit/delete.
+
+## 🛠️ Rekomendasi Development Tools
+
+- VS Code
+- Vue - Official (Volar)
+- Vue.js DevTools (browser extension)
+
+## 📄 License
+
+Private project untuk kebutuhan pengembangan internal/portofolio.
