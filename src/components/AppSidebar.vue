@@ -52,7 +52,16 @@
 
     <div class="sidebar-footer">
       <div class="sidebar-user-row">
-        <div class="user-avatar-small">{{ userInitial }}</div>
+        <div class="user-avatar-small">
+          <img
+            v-if="profilePhotoUrl && !avatarError"
+            :src="profilePhotoUrl"
+            alt="Foto Profil"
+            class="user-avatar-image"
+            @error="avatarError = true"
+          />
+          <span v-else>{{ userInitial }}</span>
+        </div>
         <div class="user-info-small">
           <p class="user-name-small">{{ user?.name }}</p>
           <p class="user-role-small">Pengguna</p>
@@ -85,10 +94,34 @@
 </template>
 
 <script setup lang="ts">
-defineProps<{
-  user: any
+import { computed, ref, watch } from 'vue'
+import api from '@/services/api'
+
+interface SidebarUser {
+  name?: string
+  profile_photo?: string
+}
+
+const props = defineProps<{
+  user: SidebarUser
   userInitial: string
 }>()
+
+const avatarError = ref(false)
+
+const profilePhotoUrl = computed(() => {
+  const value = props.user?.profile_photo
+  if (!value) return null
+  if (/^https?:\/\//i.test(value)) return value
+
+  const apiBase = String(api.defaults.baseURL ?? '').replace(/\/api\/?$/, '')
+  const cleanPath = value.startsWith('/') ? value : `/${value}`
+  return apiBase ? `${apiBase}${cleanPath}` : cleanPath
+})
+
+watch(profilePhotoUrl, () => {
+  avatarError.value = false
+})
 
 defineEmits<{
   (e: 'logout'): void
@@ -203,6 +236,13 @@ defineEmits<{
   font-weight: 700;
   font-size: 0.85rem;
   flex-shrink: 0;
+  overflow: hidden;
+}
+
+.user-avatar-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .user-name-small {

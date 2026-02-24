@@ -53,6 +53,17 @@ export function useEditProfile() {
         new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' })
     )
 
+    const resolvePhotoUrl = (value?: string | null): string | null => {
+        if (!value) return null
+        if (/^https?:\/\//i.test(value)) return value
+
+        const apiBase = String(api.defaults.baseURL ?? '').replace(/\/api\/?$/, '')
+        const cleanPath = value.startsWith('/') ? value : `/${value}`
+
+        if (!apiBase) return cleanPath
+        return `${apiBase}${cleanPath}`
+    }
+
     const loadProfile = async () => {
         loading.value = true
         try {
@@ -62,9 +73,7 @@ export function useEditProfile() {
             form.value.name = user.value.name ?? ''
             form.value.email = user.value.email ?? ''
 
-            if (user.value.profile_photo) {
-                photoPreview.value = user.value.profile_photo
-            }
+            photoPreview.value = resolvePhotoUrl(user.value.profile_photo)
         } catch (err) {
             const apiError = err as ApiError
             if (apiError.response?.status !== 401) {
@@ -111,7 +120,7 @@ export function useEditProfile() {
             })
 
             user.value = (response.data?.data as User) ?? user.value
-            photoPreview.value = user.value.profile_photo ?? null
+            photoPreview.value = resolvePhotoUrl(user.value.profile_photo)
             form.value.oldpassword = ''
             form.value.password = ''
             photoFile.value = null

@@ -7,17 +7,50 @@
 
     <div class="header-right">
       <div class="date-badge">{{ currentDate }}</div>
-      <div class="header-avatar">{{ userInitial }}</div>
+      <div class="header-avatar">
+        <img
+          v-if="profilePhotoUrl && !avatarError"
+          :src="profilePhotoUrl"
+          alt="Foto Profil"
+          class="header-avatar-image"
+          @error="avatarError = true"
+        />
+        <span v-else>{{ userInitial }}</span>
+      </div>
     </div>
   </header>
 </template>
 
 <script setup lang="ts">
-defineProps<{
-  user: any
+import { computed, ref, watch } from 'vue'
+import api from '@/services/api'
+
+interface HeaderUser {
+  name?: string
+  profile_photo?: string
+}
+
+const props = defineProps<{
+  user: HeaderUser
   userInitial: string
   currentDate: string
 }>()
+
+const avatarError = ref(false)
+
+const profilePhotoUrl = computed(() => {
+  const value = props.user?.profile_photo
+  if (!value) return null
+  if (/^https?:\/\//i.test(value)) return value
+
+  const apiBase = String(api.defaults.baseURL ?? '').replace(/\/api\/?$/, '')
+  const cleanPath = value.startsWith('/') ? value : `/${value}`
+  return apiBase ? `${apiBase}${cleanPath}` : cleanPath
+})
+
+watch(profilePhotoUrl, () => {
+  avatarError.value = false
+})
 </script>
 
 <style scoped>
@@ -76,6 +109,13 @@ defineProps<{
   font-weight: 700;
   font-size: 1rem;
   cursor: pointer;
+  overflow: hidden;
+}
+
+.header-avatar-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 </style>
