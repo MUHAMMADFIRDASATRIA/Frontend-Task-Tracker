@@ -1,119 +1,3 @@
-<script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import api from '@/services/api'
-import AppSidebar from '@/components/AppSidebar.vue'
-import AppHeader from '@/components/AppHeader.vue'
-import ProfileSummaryCard from '@/components/ProfileSummaryCard.vue'
-import ProfileEditFormCard from '@/components/ProfileEditFormCard.vue'
-import ProfileDangerZone from '@/components/ProfileDangerZone.vue'
-
-
-const router = useRouter()
-
-const user = ref<any>({})
-const loading = ref(true)
-const saving = ref(false)
-const deleting = ref(false)
-const successMsg = ref('')
-const errorMsg = ref('')
-
-// Form fields
-const form = ref({ name: '', email: '', oldpassword: '', password: '' })
-
-// Photo
-const photoPreview = ref<string | null>(null)
-const photoFile = ref<File | null>(null)
-
-const userInitial = computed(() =>
-  user.value?.name ? user.value.name.charAt(0).toUpperCase() : 'U',
-)
-
-const currentDate = computed(() =>
-  new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' }),
-)
-
-const loadProfile = async () => {
-  loading.value = true
-  try {
-    const res = await api.get('/profile')
-    user.value = res.data.data
-    form.value.name = user.value.name || ''
-    form.value.email = user.value.email || ''
-    if (user.value.profile_photo) {
-      photoPreview.value = user.value.profile_photo
-    }
-  } catch (err: any) {
-    if (err.response?.status !== 401) console.error('Gagal memuat profil:', err)
-  } finally {
-    loading.value = false
-  }
-}
-
-const onPhotoChange = (file: File) => {
-  photoFile.value = file
-  photoPreview.value = URL.createObjectURL(file)
-}
-
-const removePhoto = () => {
-  photoPreview.value = null
-  photoFile.value = null
-}
-
-const updateForm = (value: { name: string; email: string; oldpassword: string; password: string }) => {
-  form.value = value
-}
-
-const saveProfile = async () => {
-  successMsg.value = ''
-  errorMsg.value = ''
-  saving.value = true
-  try {
-    const payload = new FormData()
-    if (form.value.name) payload.append('name', form.value.name)
-    if (form.value.email) payload.append('email', form.value.email)
-    if (form.value.oldpassword) payload.append('oldpassword', form.value.oldpassword)
-    if (form.value.password) payload.append('password', form.value.password)
-    if (photoFile.value) payload.append('profile_photo', photoFile.value)
-
-    const res = await api.put('/profile/edit', payload, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    })
-    user.value = res.data.data
-    form.value.oldpassword = ''
-    form.value.password = ''
-    photoFile.value = null
-    successMsg.value = 'Profil berhasil diperbarui!'
-    setTimeout(() => (successMsg.value = ''), 3000)
-  } catch (err: any) {
-    errorMsg.value = err.response?.data?.message || 'Gagal menyimpan perubahan.'
-    setTimeout(() => (errorMsg.value = ''), 4000)
-  } finally {
-    saving.value = false
-  }
-}
-
-const deleteAccount = async () => {
-  if (!confirm('Yakin ingin menghapus akun? Tindakan ini tidak dapat dibatalkan.')) return
-  deleting.value = true
-  try {
-    await api.delete('/profile')
-    localStorage.removeItem('token')
-    router.push('/login')
-  } catch (err) {
-    console.error('Gagal menghapus akun:', err)
-    deleting.value = false
-  }
-}
-
-const handleLogout = () => {
-  localStorage.removeItem('token')
-  router.push('/login')
-}
-
-onMounted(loadProfile)
-</script>
-
 <template>
   <div class="app-shell">
     <AppSidebar :user="user" :user-initial="userInitial" @logout="handleLogout" />
@@ -174,6 +58,40 @@ onMounted(loadProfile)
     </main>
   </div>
 </template>
+
+<script setup lang="ts">
+import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import api from '@/services/api'
+import AppSidebar from '@/components/AppSidebar.vue'
+import AppHeader from '@/components/AppHeader.vue'
+import ProfileSummaryCard from '@/components/ProfileSummaryCard.vue'
+import ProfileEditFormCard from '@/components/ProfileEditFormCard.vue'
+import ProfileDangerZone from '@/components/ProfileDangerZone.vue'
+import { useEditProfile } from '@/composables/useEditProfile'
+
+const {
+  user,
+  userInitial,
+  currentDate,
+  loading,
+  form,
+  photoPreview,
+  saving,
+  deleting,
+  successMsg,
+  errorMsg,
+  loadProfile,
+  onPhotoChange,
+  removePhoto,
+  updateForm,
+  saveProfile,
+  handleLogout,
+  deleteAccount,
+} = useEditProfile()
+
+onMounted(loadProfile)
+</script>
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
