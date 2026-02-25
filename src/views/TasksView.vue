@@ -13,22 +13,30 @@
       />
 
       <div class="content-body">
+        <div class="content-inner">
+          <section class="page-intro">
+            <p class="intro-eyebrow">Task Workspace</p>
+            <h2 class="intro-title">Kelola daftar tugas harianmu</h2>
+            <p class="intro-desc">
+              Pantau progres, tandai task selesai, dan atur prioritas dengan cepat.
+            </p>
+          </section>
 
-      <TasksStats
-        :completed="completedTasks"
-        :pending="pendingTasks"
-        :progress="progressPercentage"
-      />
+          <TasksStats
+            :completed="completedTasks"
+            :pending="pendingTasks"
+            :progress="progressPercentage"
+          />
 
-      <TasksListPanel
-        :tasks="tasks"
-        :loading="loading"
-        @add-task="goToAddTask"
-        @toggle-task="toggleTask"
-        @edit-task="goToEditTask"
-        @delete-task="handleDeleteTask"
-      />
-
+          <TasksListPanel
+            :tasks="tasks"
+            :loading="loading"
+            @add-task="goToAddTask"
+            @toggle-task="toggleTask"
+            @edit-task="goToEditTask"
+            @delete-task="handleDeleteTask"
+          />
+        </div>
       </div>
 
     </main>
@@ -90,17 +98,58 @@ onMounted(fetchData)
 }
 
 .content-body {
-  padding: 32px 36px;
+  padding: 28px 32px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
   overflow-y: auto;
   flex: 1;
 }
 
+.content-inner {
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.page-intro {
+  padding: 16px 18px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.08), rgba(99, 102, 241, 0.08));
+  border: 1px solid rgba(148, 163, 184, 0.14);
+}
+
+.intro-eyebrow {
+  margin: 0 0 4px;
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #38bdf8;
+  font-weight: 600;
+}
+
+.intro-title {
+  margin: 0;
+  font-size: 1.15rem;
+  color: #f1f5f9;
+  font-weight: 700;
+}
+
+.intro-desc {
+  margin: 6px 0 0;
+  font-size: 0.82rem;
+  color: #94a3b8;
+}
+
 @media (max-width: 900px) {
   .content-body {
-    padding: 20px;
+    padding: 16px;
+  }
+
+  .page-intro {
+    padding: 14px;
   }
 }
 </style>

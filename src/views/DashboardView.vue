@@ -57,12 +57,8 @@ const {
   completionPercent,
   currentDate,
   loadDashboard,
+  handleLogout,
 } = useDashboard()
-
-const handleLogout = () => {
-  localStorage.removeItem('token')
-  router.push('/')
-}
 
 onMounted(loadDashboard)
 </script>

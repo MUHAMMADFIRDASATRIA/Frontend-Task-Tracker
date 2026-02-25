@@ -1,5 +1,6 @@
 import { computed, ref } from 'vue'
 import api from '@/services/api'
+import router from '@/router'
 
 interface User {
   name?: string
@@ -86,6 +87,11 @@ export function useDashboard() {
     }
   }
 
+  const handleLogout = () => {
+  localStorage.removeItem('token')
+  router.push('/')
+  }
+
   return {
     user,
     tasks,
@@ -98,5 +104,6 @@ export function useDashboard() {
     completionPercent,
     currentDate,
     loadDashboard,
+    handleLogout,
   }
 }

@@ -2,7 +2,7 @@ import {computed, ref} from 'vue'
 import { useRouter } from 'vue-router'
 import api from '@/services/api'
 
-interface project {
+interface Project {
     title : string,
     description : string,
     tenggat : string,
@@ -33,7 +33,7 @@ export function useEditProject() {
     const success = ref(false)
     const alertMessage = ref('')
     const alertSuccess = ref(false)
-    const form = ref<project>({
+    const form = ref<Project>({
         title : '',
         description : '',
         tenggat : '',
