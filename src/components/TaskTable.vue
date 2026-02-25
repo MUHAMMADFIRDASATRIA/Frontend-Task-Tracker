@@ -19,6 +19,7 @@
     <div class="col-labels">
       <span class="col-label col-detail">Detail Tugas</span>
       <span class="col-label col-project">Proyek</span>
+      <span class="col-label col-priority">Prioritas</span>
       <span class="col-label col-status">Status</span>
     </div>
 
@@ -75,6 +76,13 @@
           </span>
         </div>
 
+        <!-- Priority -->
+        <div class="cell cell-priority">
+          <span class="priority-chip" :class="priorityClass(task.priority)">
+            {{ priorityLabel(task.priority) }}
+          </span>
+        </div>
+
         <!-- Status -->
         <div class="cell cell-status">
           <span class="status-pill" :class="task.finish ? 'pill-done' : 'pill-pending'">
@@ -103,8 +111,35 @@ const props = defineProps<{
 }>()
 
 const sortedTasks = computed(() =>
-  [...props.tasks].sort((a, b) => Number(Boolean(a.finish)) - Number(Boolean(b.finish))),
+  // Show only tasks that are not finished
+  [...props.tasks]
+    .filter((t) => !t.finish)
+    .sort((a, b) => {
+      const priorityOrder: Record<string, number> = { high: 0, medium: 1, low: 2 }
+      const aPriority = priorityOrder[a.priority?.toLowerCase() ?? ''] ?? 3
+      const bPriority = priorityOrder[b.priority?.toLowerCase() ?? ''] ?? 3
+
+      if (aPriority !== bPriority) {
+        return aPriority - bPriority
+      }
+
+      // both are unfinished here; keep original order fallback
+      return 0
+    }),
 )
+
+const priorityLabel = (priority?: string) => {
+  if (!priority) return '-'
+  const map: Record<string, string> = { high: 'Tinggi', medium: 'Sedang', low: 'Rendah' }
+  return map[priority.toLowerCase()] ?? priority
+}
+
+const priorityClass = (priority?: string) => {
+  if (!priority) return 'chip-none'
+  const map: Record<string, string> = { high: 'chip-high', medium: 'chip-medium', low: 'chip-low' }
+  return map[priority.toLowerCase()] ?? 'chip-none'
+}
+
 </script>
 
 <style scoped>
@@ -202,7 +237,7 @@ const sortedTasks = computed(() =>
 /* ─── Column Labels ─── */
 .col-labels {
   display: grid;
-  grid-template-columns: 1fr 180px 130px;
+  grid-template-columns: 1fr 180px 120px 130px;
   padding: 0 26px 10px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
@@ -274,7 +309,7 @@ const sortedTasks = computed(() =>
 /* ─── Task Row ─── */
 .task-row {
   display: grid;
-  grid-template-columns: 1fr 180px 130px;
+  grid-template-columns: 1fr 180px 120px 130px;
   align-items: center;
   padding: 0 26px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.04);
@@ -359,6 +394,23 @@ const sortedTasks = computed(() =>
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* Priority chip */
+.cell-priority { padding-left: 8px; }
+.priority-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.chip-high { background: rgba(239, 68, 68, 0.08); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.15); }
+.chip-medium { background: rgba(245, 158, 11, 0.08); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.15); }
+.chip-low { background: rgba(100, 116, 139, 0.08); color: #94a3b8; border: 1px solid rgba(100, 116, 139, 0.12); }
+.chip-none { background: rgba(255,255,255,0.02); color: #475569; border: 1px solid rgba(255,255,255,0.03); }
 
 /* ─── Status Pill ─── */
 .status-pill {

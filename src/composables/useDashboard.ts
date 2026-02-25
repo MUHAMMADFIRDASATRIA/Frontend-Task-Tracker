@@ -16,6 +16,7 @@ interface Task {
   id: number
   finish?: boolean
   projectTitle?: string
+  priority?: string | number
   [key: string]: unknown
 }
 
@@ -69,6 +70,14 @@ export function useDashboard() {
 
         projectTasks.forEach((task) => {
           task.projectTitle = project.title
+
+          // Normalize priority: backend might send numeric values or strings
+          if (typeof task.priority === 'number') {
+            const map: Record<number, string> = { 1: 'high', 2: 'medium', 3: 'low' }
+            task.priority = map[task.priority as number] ?? String(task.priority)
+          } else if (typeof task.priority === 'string') {
+            task.priority = (task.priority as string).toLowerCase()
+          }
         })
 
         allTasks.push(...projectTasks)

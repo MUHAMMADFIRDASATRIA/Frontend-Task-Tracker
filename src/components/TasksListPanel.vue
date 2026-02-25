@@ -67,9 +67,9 @@
                 {{ task.title }}
               </span>
               <div class="task-badges">
-                <!-- Priority badge -->
-                <span v-if="task.priority" :class="['task-badge', priorityClass(task.priority as string)]">
-                  {{ priorityLabel(task.priority as string) }}
+                <!-- Priority badge (always rendered with fallback) -->
+                <span :class="['task-badge', task.priority ? priorityClass(task.priority as string) : 'badge-none']">
+                  {{ task.priority ? priorityLabel(task.priority as string) : '-' }}
                 </span>
                 <!-- Status badge -->
                 <span :class="['task-badge', task.finish ? 'badge-done' : 'badge-pending']">
@@ -124,8 +124,25 @@ const props = defineProps<{
   loading: boolean
 }>()
 
+const priorityWeight = (p?: string) => {
+  if (!p) return 3
+  const map: Record<string, number> = { high: 0, medium: 1, low: 2 }
+  return map[p.toLowerCase()] ?? 3
+}
+
 const sortedTasks = computed(() =>
-  [...props.tasks].sort((a, b) => Number(Boolean(a.finish)) - Number(Boolean(b.finish))),
+  [...props.tasks].sort((a, b) => {
+     const priorityOrder: Record<string, number> = { high: 0, medium: 1, low: 2 }
+     const aPriority = priorityOrder[a.priority?.toLowerCase() ?? ''] ?? 3
+     const bPriority = priorityOrder[b.priority?.toLowerCase() ?? ''] ?? 3
+     
+     if (aPriority !== bPriority) {
+       return aPriority - bPriority
+     }
+
+     return Number(a.finish) - Number(b.finish)
+
+  }),
 )
 
 const emit = defineEmits<{
@@ -140,21 +157,23 @@ const onToggle = (task: TaskItem, event: Event) => {
   emit('toggle-task', { ...task, finish: checked })
 }
 
-const priorityLabel = (priority: string): string => {
+const priorityLabel = (priority?: string): string => {
   const map: Record<string, string> = {
     high: 'Tinggi',
     medium: 'Sedang',
     low: 'Rendah',
   }
+  if (!priority) return '-'
   return map[priority?.toLowerCase()] ?? priority
 }
 
-const priorityClass = (priority: string): string => {
+const priorityClass = (priority?: string): string => {
   const map: Record<string, string> = {
     high: 'badge-high',
     medium: 'badge-medium',
     low: 'badge-low',
   }
+  if (!priority) return 'badge-none'
   return map[priority?.toLowerCase()] ?? 'badge-pending'
 }
 </script>
@@ -469,6 +488,13 @@ const priorityClass = (priority: string): string => {
   background: rgba(100, 116, 139, 0.1);
   color: #94a3b8;
   border: 1px solid rgba(100, 116, 139, 0.2);
+}
+
+/* ── No-priority badge ── */
+.badge-none {
+  background: rgba(255,255,255,0.02);
+  color: #475569;
+  border: 1px solid rgba(255,255,255,0.03);
 }
 
 /* ── Task Main Row ── */
