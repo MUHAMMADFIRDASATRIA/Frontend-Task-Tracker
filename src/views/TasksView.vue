@@ -15,11 +15,24 @@
       <div class="content-body">
         <div class="content-inner">
           <section class="page-intro">
-            <p class="intro-eyebrow">Task Workspace</p>
-            <h2 class="intro-title">Kelola daftar tugas harianmu</h2>
-            <p class="intro-desc">
-              Pantau progres, tandai task selesai, dan atur prioritas dengan cepat.
-            </p>
+            <div class="intro-text">
+              <p class="intro-eyebrow">Task Workspace</p>
+              <h2 class="intro-title">Kelola daftar tugas harianmu</h2>
+              <p class="intro-desc">
+                Pantau progres, tandai task selesai, dan atur prioritas dengan cepat.
+              </p>
+            </div>
+
+            <!-- Tombol Anggota -->
+            <button class="btn-members" @click="openMembers">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+              Anggota
+            </button>
           </section>
 
           <TasksStats
@@ -69,6 +82,11 @@ const {
 } = useTasks()
 
 onMounted(fetchData)
+
+function openMembers() {
+  // Ganti dengan logika kamu: buka modal, navigasi ke halaman, dsb.
+  console.log("Buka panel anggota")
+}
 </script>
 
 <style scoped>
@@ -119,6 +137,19 @@ onMounted(fetchData)
   border-radius: 16px;
   background: linear-gradient(135deg, rgba(56, 189, 248, 0.08), rgba(99, 102, 241, 0.08));
   border: 1px solid rgba(148, 163, 184, 0.14);
+
+  /* Ubah menjadi flex agar tombol sejajar di kanan */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.intro-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
 }
 
 .intro-eyebrow {
@@ -141,6 +172,34 @@ onMounted(fetchData)
   margin: 6px 0 0;
   font-size: 0.82rem;
   color: #94a3b8;
+}
+
+/* ── Tombol Anggota ── */
+.btn-members {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 18px;
+  border-radius: 10px;
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  background: rgba(56, 189, 248, 0.1);
+  color: #38bdf8;
+  font-family: 'Sora', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s, border-color 0.2s, transform 0.15s;
+}
+
+.btn-members:hover {
+  background: rgba(56, 189, 248, 0.2);
+  border-color: rgba(56, 189, 248, 0.6);
+  transform: translateY(-1px);
+}
+
+.btn-members:active {
+  transform: translateY(0);
 }
 
 @media (max-width: 900px) {
