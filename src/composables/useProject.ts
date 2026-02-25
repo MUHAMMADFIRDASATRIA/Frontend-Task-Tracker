@@ -84,41 +84,41 @@ export function useProject() {
     loading.value = true
 
     try {
-            const [profileRes, projectRes] = await Promise.all([
+        const [profileRes, projectRes] = await Promise.all([
         api.get('/profile'),
         api.get('/users/project'),
-            ])
+        ])
 
-            user.value = (profileRes.data?.data as User) ?? {}
-            const raw: Array<Record<string, unknown>> = Array.isArray(projectRes.data?.data)
+        user.value = (profileRes.data?.data as User) ?? {}
+        const raw: Array<Record<string, unknown>> = Array.isArray(projectRes.data?.data)
                 ? projectRes.data.data
                 : []
 
-            const enriched: Project[] = await Promise.all(
-        raw.map(async (p) => {
-                    try {
-            const taskRes = await api.get(`/users/project/${p.id}/tasks`)
-                        const tasks: Task[] = Array.isArray(taskRes.data?.data) ? taskRes.data.data : []
-            const done = tasks.filter((t) => t.finish).length
+        const enriched: Project[] = await Promise.all(
+            raw.map(async (p) => {
+                try {
+                    const taskRes = await api.get(`/users/project/${p.id}/tasks`)
+                    const tasks: Task[] = Array.isArray(taskRes.data?.data) ? taskRes.data.data : []
+                    const done = tasks.filter((t) => t.finish).length
 
-            return {
-                            ...p,
-                            deadline: String((p as { tenggat?: unknown }).tenggat ?? ''),
-                            progress: tasks.length > 0 ? Math.round((done / tasks.length) * 100) : 0,
-                            taskCount: tasks.length,
-                        } as Project
-                    } catch {
-                        return {
-                            ...(p as Project),
-                            deadline: String((p as { tenggat?: unknown }).tenggat ?? ''),
-                            progress: Number((p as { progress?: number }).progress ?? 0),
-                            taskCount: 0,
-                        }
+                    return {
+                        ...p,
+                        deadline: String((p as { tenggat?: unknown }).tenggat ?? ''),
+                        progress: tasks.length > 0 ? Math.round((done / tasks.length) * 100) : 0,
+                        taskCount: tasks.length,
+                    } as Project
+                } catch (err) {
+                    return {
+                        ...(p as Project),
+                        deadline: String((p as { tenggat?: unknown }).tenggat ?? ''),
+                        progress: Number((p as { progress?: number }).progress ?? 0),
+                        taskCount: 0,
                     }
-        }),
-            )
+                }
+            }),
+        )
 
-            projects.value = enriched
+        projects.value = enriched
         } catch (err: unknown) {
             if ((err as ApiError).response?.status !== 401) {
                 console.error('Gagal memuat proyek:', err)
@@ -129,9 +129,9 @@ export function useProject() {
     }
 
     const handleCreateProject = async (data: CreateProjectPayload) => {
-    creating.value = true
+        creating.value = true
 
-    try {
+        try {
             const payload: CreateProjectApiPayload = {
                 title: data.title,
                 description: data.description,
@@ -143,13 +143,13 @@ export function useProject() {
             await loadData()
         } catch (err: unknown) {
             console.error('Gagal membuat proyek:', err)
-    } finally {
+        } finally {
             creating.value = false
-    }
+        }
     }
 
     const goToProject = (id: number) => {
-    router.push(`/projects/${id}`)
+        router.push(`/projects/${id}`)
     }
 
     const handleEditProject = (id: number) => {
@@ -169,8 +169,8 @@ export function useProject() {
     }
 
     const handleLogout = () => {
-    localStorage.removeItem('token')
-    router.push('/')
+        localStorage.removeItem('token')
+        router.push('/')
     }
 
     return {
