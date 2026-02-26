@@ -206,7 +206,7 @@ onMounted(loadData)
 /* ── Page Header Row ── */
 .page-header-row {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
@@ -227,6 +227,8 @@ onMounted(loadData)
   cursor: pointer;
   transition: all 0.2s;
   flex-shrink: 0;
+  margin-top: 0;
+  align-self: center;
 }
 
 .btn-join-outline:hover {
