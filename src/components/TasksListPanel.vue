@@ -132,16 +132,14 @@ const priorityWeight = (p?: string) => {
 
 const sortedTasks = computed(() =>
   [...props.tasks].sort((a, b) => {
-     const priorityOrder: Record<string, number> = { high: 0, medium: 1, low: 2 }
-     const aPriority = priorityOrder[a.priority?.toLowerCase() ?? ''] ?? 3
-     const bPriority = priorityOrder[b.priority?.toLowerCase() ?? ''] ?? 3
-     
-     if (aPriority !== bPriority) {
-       return aPriority - bPriority
-     }
+    // unfinished tasks first
+    const finishComp = Number(Boolean(a.finish)) - Number(Boolean(b.finish))
+    if (finishComp !== 0) return finishComp
 
-     return Number(a.finish) - Number(b.finish)
-
+    // both same finish state: sort by priority (high -> medium -> low -> none)
+    const aWeight = priorityWeight(a.priority)
+    const bWeight = priorityWeight(b.priority)
+    return aWeight - bWeight
   }),
 )
 
