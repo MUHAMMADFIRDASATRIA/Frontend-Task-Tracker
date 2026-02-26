@@ -11,10 +11,20 @@
 
       <div class="content-body">
         <!-- Page Header -->
-        <ProjectPageHeader
-          title="Proyek Saya"
-          subtitle="Kelola dan pantau semua proyek Anda"
-        />
+        <div class="page-header-row">
+          <ProjectPageHeader
+            title="Proyek Saya"
+            subtitle="Kelola dan pantau semua proyek Anda"
+          />
+          <button class="btn-join-outline" @click="showJoinModal = true">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+              <polyline points="10 17 15 12 10 7"/>
+              <line x1="15" y1="12" x2="3" y2="12"/>
+            </svg>
+            Gabung Proyek
+          </button>
+        </div>
 
         <!-- Toolbar -->
         <ProjectToolbar
@@ -52,6 +62,7 @@
             @click="goToProject(project.id)"
             @edit="handleEditProject"
             @delete="handleDeleteProject"
+            @manage-members="openMemberModal(project)"
           />
         </div>
       </div>
@@ -64,6 +75,37 @@
       @close="showCreateModal = false"
       @submit="handleCreateProject"
     />
+
+    <!-- Join Project Modal -->
+    <Joinprojectmodal
+      :show="showJoinModal"
+      :joining="joining"
+      :error="joinError"
+      v-model="joinCode"
+      @close="showJoinModal = false"
+      @submit="submitJoin"
+    />
+
+    <!-- Manage Members Modal -->
+    <Managemembersmodal
+      :show="showMemberModal"
+      :project-title="selectedProject?.title"
+      :members="memberList"
+      :loading-members="loadingMembers"
+      :inviting="inviting"
+      :invite-message="inviteMessage"
+      :invite-success="inviteSuccess"
+      :generated-code="generatedCode"
+      :generating-code="generatingCode"
+      :code-copied="codeCopied"
+      :invite-user-id="inviteUserId"
+      @close="closeMemberModal"
+      @invite="submitInvite"
+      @generate-code="submitGenerateCode"
+      @copy-code="copyCode"
+      @kick="handleKick"
+      @update:invite-user-id="inviteUserId = $event"
+    />
   </div>
 </template>
 
@@ -75,7 +117,10 @@ import ProjectPageHeader from '@/components/ProjectPageHeader.vue'
 import ProjectToolbar from '@/components/ProjectToolbar.vue'
 import ProjectCard from '@/components/ProjectCard.vue'
 import CreateProjectModal from '@/components/CreateProjectModal.vue'
+import Joinprojectmodal from '@/components/Joinprojectmodal.vue'
+import Managemembersmodal from '@/components/Managemembersmodal.vue'
 import { useProject } from '@/composables/useProject'
+import type { ProjectWithRole } from '@/types/project'
 
 const {
   user,
@@ -94,6 +139,30 @@ const {
   handleEditProject,
   handleDeleteProject,
   handleLogout,
+
+  showJoinModal,
+  joinCode,
+  joining,
+  joinError,
+  submitJoin,
+
+  showMemberModal,
+  selectedProject,
+  memberList,
+  loadingMembers,
+  inviteUserId,
+  inviting,
+  inviteMessage,
+  inviteSuccess,
+  generatedCode,
+  generatingCode,
+  codeCopied,
+  openMemberModal,
+  closeMemberModal,
+  submitInvite,
+  submitGenerateCode,
+  copyCode,
+  handleKick,
 } = useProject()
 
 onMounted(loadData)
@@ -134,6 +203,38 @@ onMounted(loadData)
   flex: 1;
 }
 
+/* ── Page Header Row ── */
+.page-header-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.btn-join-outline {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 16px;
+  background: transparent;
+  color: #64748b;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 10px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  font-family: 'Sora', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.btn-join-outline:hover {
+  color: #e2e8f0;
+  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.04);
+}
+
 /* ── States ── */
 .loading-state,
 .empty-state {
@@ -157,9 +258,7 @@ onMounted(loadData)
 }
 
 @keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+  to { transform: rotate(360deg); }
 }
 
 /* ── Project Grid ── */

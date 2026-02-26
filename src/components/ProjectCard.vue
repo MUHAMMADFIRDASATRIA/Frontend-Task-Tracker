@@ -1,14 +1,25 @@
 <template>
   <div class="project-card" @click="$emit('click', project.id)">
     <div class="card-top">
-      <div class="project-icon">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-          <path
-            d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"
-            stroke="currentColor"
-            stroke-width="1.8"
-          />
-        </svg>
+      <div class="card-top-left">
+        <div class="project-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path
+              d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"
+              stroke="currentColor"
+              stroke-width="1.8"
+            />
+          </svg>
+        </div>
+        <span class="role-badge" :class="project.role === 'leader' ? 'badge-leader' : 'badge-member'">
+          <svg v-if="project.role === 'leader'" width="9" height="9" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+          </svg>
+          <svg v-else width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+          </svg>
+          {{ project.role === 'leader' ? 'Leader' : 'Member' }}
+        </span>
       </div>
       <span :class="['status-badge', statusClass(project)]">{{ statusLabel(project) }}</span>
     </div>
@@ -43,7 +54,15 @@
       </div>
     </div>
 
-    <div class="card-actions">
+    <!-- Actions: hanya tampil untuk leader -->
+    <div v-if="project.role === 'leader'" class="card-actions">
+      <button class="btn-action btn-members" @click.stop="$emit('manage-members', project)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+        Anggota
+      </button>
       <button class="btn-action btn-edit" @click.stop="$emit('edit', project.id)">Edit</button>
       <button class="btn-action btn-delete" @click.stop="$emit('delete', project.id)">Hapus</button>
     </div>
@@ -58,9 +77,10 @@ interface Project {
   progress: number
   deadline?: string
   taskCount?: number
+  role?: 'leader' | 'member'
 }
 
-const props = defineProps<{
+defineProps<{
   project: Project
 }>()
 
@@ -68,11 +88,10 @@ defineEmits<{
   (e: 'click', id: number): void
   (e: 'edit', id: number): void
   (e: 'delete', id: number): void
+  (e: 'manage-members', project: Project): void
 }>()
 
 const statusClass = (p: Project) => (p.progress === 100 ? 'badge-green' : 'badge-blue')
-
-// <-- Fungsi untuk menentukan label status berdasarkan progress -->
 const statusLabel = (p: Project) => (p.progress === 100 ? 'Selesai' : 'Berjalan')
 
 const formatDate = (date?: string) => {
@@ -82,10 +101,8 @@ const formatDate = (date?: string) => {
     month: 'short',
     year: 'numeric',
   })
-
 }
 </script>
-
 
 <style scoped>
 .project-card {
@@ -112,6 +129,12 @@ const formatDate = (date?: string) => {
   justify-content: space-between;
 }
 
+.card-top-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .project-icon {
   width: 36px;
   height: 36px;
@@ -121,6 +144,30 @@ const formatDate = (date?: string) => {
   align-items: center;
   justify-content: center;
   color: #818cf8;
+}
+
+.role-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.63rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.badge-leader {
+  background: rgba(234, 179, 8, 0.1);
+  color: #fbbf24;
+  border: 1px solid rgba(234, 179, 8, 0.2);
+}
+
+.badge-member {
+  background: rgba(99, 102, 241, 0.1);
+  color: #818cf8;
+  border: 1px solid rgba(99, 102, 241, 0.2);
 }
 
 .status-badge {
@@ -168,9 +215,7 @@ const formatDate = (date?: string) => {
   font-size: 0.72rem;
 }
 
-.progress-label {
-  color: #475569;
-}
+.progress-label { color: #475569; }
 
 .progress-value {
   color: #94a3b8;
@@ -224,6 +269,20 @@ const formatDate = (date?: string) => {
   padding: 8px 10px;
   cursor: pointer;
   transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.btn-members {
+  color: #22d3ee;
+  border-color: rgba(6, 182, 212, 0.2);
+}
+
+.btn-members:hover {
+  background: rgba(6, 182, 212, 0.08);
+  border-color: rgba(6, 182, 212, 0.4);
 }
 
 .btn-edit:hover {
