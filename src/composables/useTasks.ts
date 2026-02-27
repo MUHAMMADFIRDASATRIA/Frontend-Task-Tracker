@@ -13,13 +13,14 @@ interface ApiError {
 
 interface Task {
   id: number
-    title?: string
+  title?: string
   finish?: boolean
   projectTitle?: string
   [key: string]: unknown
 }
 
 interface User {
+  id?: number
   name?: string
   [key: string]: unknown
 }
@@ -27,7 +28,7 @@ interface User {
 interface Project {
   id: number
   title: string
-    [key: string]: unknown
+  [key: string]: unknown
 }
 
 export function useTasks() {
@@ -38,6 +39,9 @@ export function useTasks() {
     const loading = ref(true)
     const user = ref<User>({})
     const project = ref<Project>()
+    const userRole = ref<'leader' | 'member'>('member')
+
+    const isLeader = computed(() => userRole.value === 'leader')
 
     const userInitial = computed(()=>
         user.value?.name? user.value.name.charAt(0).toUpperCase() : 'A',
@@ -52,6 +56,7 @@ export function useTasks() {
     )
 
     const projectId = String(route.params.id ?? '')
+    // const taskId = String(route.params.taskId ?? '')
 
     const completedTasks = computed(()=>
         tasks.value.filter(t => t.finish).length
@@ -65,6 +70,7 @@ export function useTasks() {
         if (tasks.value.length === 0) return 0
         return Math.round((completedTasks.value / tasks.value.length) * 100)
     })
+    
     const fetchData = async () => {
         if (!projectId) {
             loading.value = false
@@ -74,17 +80,33 @@ export function useTasks() {
 
         loading.value = true
         try {
-        const [projectRes, taskRes, userRes] = await Promise.all([
+        const [projectRes, taskRes, userRes, memberRes] = await Promise.all([
         api.get(`/users/project/${projectId}`),
         api.get(`/users/project/${projectId}/tasks`),
         api.get(`/profile`),
+        api.get(`/users/project/${projectId}/members`),
         ])
 
         project.value = (projectRes.data?.data as Project) ?? undefined
         tasks.value = Array.isArray(taskRes.data?.data) ? taskRes.data.data : []
         user.value = (userRes.data?.data as User) ?? {}
 
-    } catch (error) {
+        const members = Array.isArray(memberRes.data?.data) ? memberRes.data.data : []
+        const myMember = members.find(
+            (m: { user_id: number; role: string }) => Number(m.user_id) === Number(user.value.id)
+        )
+
+        const role = myMember?.role
+        userRole.value = role === 'leader' ? 'leader' : 'member'
+
+    } catch (error: unknown) {
+        const err = error as { response?: { status?: number}}
+
+        if (err.response?.status === 403 || err.response?.status === 404) {
+        alert('Proyek tidak ditemukan atau kamu tidak memiliki akses.')
+        router.replace('/projects')
+        }
+    
         console.error(error)
         tasks.value = []
     } finally {
@@ -92,17 +114,20 @@ export function useTasks() {
     }
     }
 
-    const toggleTask = async (task: any) => {
+    const toggleTask = async (task: Task) => {
     // Optimistic update — langsung ubah UI
     const found = tasks.value.find(t => t.id === task.id)
     if (found) {
         found.finish = Boolean(task.finish)
     }
+    console.log('toggle task:', task)        // ← cek isi task
+    console.log('task.id:', task.id)         // ← cek id-nya
+    console.log('projectId:', projectId) 
 
     try {
         if (!projectId) return
 
-        await api.put(`/users/project/${projectId}/tasks/${task.id}`, {
+        await api.patch(`/users/project/${projectId}/tasks/${task.id}/finish`, {
         finish: task.finish
         })
     } catch (error) {
@@ -156,6 +181,7 @@ export function useTasks() {
         completedTasks,
         pendingTasks,
         progressPercentage,
+        isLeader,
         fetchData,
         toggleTask,
         goToAddTask,

@@ -7,7 +7,7 @@
         <h2 class="task-panel-title">Daftar Tugas</h2>
       </div>
 
-      <button @click="$emit('add-task')" class="btn-add-task">
+      <button  v-if="isLeader" @click="$emit('add-task')" class="btn-add-task">
         <span class="btn-icon">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round">
             <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
@@ -37,7 +37,8 @@
         </svg>
       </div>
       <p class="state-text">Belum ada tugas</p>
-      <p class="state-sub">Tekan tombol tambah untuk mulai</p>
+      <p class="state-sub" v-if="isLeader">Tekan tombol tambah untuk mulai</p>
+      <p class="state-sub" v-else>Belum ada tugas untuk kamu</p>
     </div>
 
     <!-- Task List -->
@@ -80,7 +81,7 @@
           </div>
 
           <!-- Actions -->
-          <div class="task-actions" @click.stop>
+          <div v-if="isLeader" class="task-actions" @click.stop>
             <button class="btn-action btn-edit" title="Edit" @click="emit('edit-task', task)">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
@@ -122,6 +123,7 @@ interface TaskItem {
 const props = defineProps<{
   tasks: TaskItem[]
   loading: boolean
+  isLeader: boolean
 }>()
 
 const priorityWeight = (p?: string) => {

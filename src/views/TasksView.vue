@@ -44,6 +44,7 @@
           <TasksListPanel
             :tasks="tasks"
             :loading="loading"
+            :is-leader="isLeader"
             @add-task="goToAddTask"
             @toggle-task="toggleTask"
             @edit-task="goToEditTask"
@@ -73,6 +74,7 @@ const {
     completedTasks,
     pendingTasks,
     progressPercentage,
+    isLeader,
     fetchData,
     toggleTask,
     goToAddTask,

@@ -11,11 +11,10 @@
 
       <div class="content-body">
         <!-- Page Header -->
-        <div class="page-header-row">
-          <ProjectPageHeader
-            title="Proyek Saya"
-            subtitle="Kelola dan pantau semua proyek Anda"
-          />
+        <ProjectPageHeader
+          title="Proyek Saya"
+          subtitle="Kelola dan pantau semua proyek Anda"
+        >
           <button class="btn-join-outline" @click="showJoinModal = true">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
@@ -24,7 +23,13 @@
             </svg>
             Gabung Proyek
           </button>
-        </div>
+          <RouterLink class="btn-primary" to="/projects/create">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+              <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+            </svg>
+            Proyek Baru
+          </RouterLink>
+        </ProjectPageHeader>
 
         <!-- Toolbar -->
         <ProjectToolbar
