@@ -90,11 +90,18 @@ export function useTasks() {
         project.value = (projectRes.data?.data as Project) ?? undefined
         tasks.value = Array.isArray(taskRes.data?.data) ? taskRes.data.data : []
         user.value = (userRes.data?.data as User) ?? {}
+        
+        console.log('user dari API:', userRes.data)
+        console.log('user.value.id:', user.value.id)
 
         const members = Array.isArray(memberRes.data?.data) ? memberRes.data.data : []
+        console.log('members:', members)
+
         const myMember = members.find(
             (m: { user_id: number; role: string }) => Number(m.user_id) === Number(user.value.id)
         )
+        console.log('myMember:', myMember)
+        console.log('role:', myMember?.role)
 
         const role = myMember?.role
         userRole.value = role === 'leader' ? 'leader' : 'member'

@@ -84,6 +84,7 @@ export function useProject() {
   const inviting = ref(false)
   const inviteMessage = ref('')
   const inviteSuccess = ref(false)
+  
   const generatedCode = ref('')
   const generatingCode = ref(false)
   const codeCopied = ref(false)

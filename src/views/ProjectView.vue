@@ -98,6 +98,7 @@
       :members="memberList"
       :loading-members="loadingMembers"
       :inviting="inviting"
+      :is-leader="selectedProject?.role === 'leader'"
       :invite-message="inviteMessage"
       :invite-success="inviteSuccess"
       :generated-code="generatedCode"
@@ -125,7 +126,6 @@ import CreateProjectModal from '@/components/CreateProjectModal.vue'
 import Joinprojectmodal from '@/components/Joinprojectmodal.vue'
 import Managemembersmodal from '@/components/Managemembersmodal.vue'
 import { useProject } from '@/composables/useProject'
-import type { ProjectWithRole } from '@/types/project'
 
 const {
   user,

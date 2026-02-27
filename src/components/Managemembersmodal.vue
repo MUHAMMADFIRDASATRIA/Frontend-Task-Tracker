@@ -23,78 +23,89 @@
         </div>
 
         <div class="modal-form">
-          <!-- Tabs -->
-          <div class="member-tabs">
-            <button class="member-tab" :class="{ active: activeTab === 'invite' }" @click="activeTab = 'invite'">
-              Invite by User ID
-            </button>
-            <button class="member-tab" :class="{ active: activeTab === 'code' }" @click="activeTab = 'code'">
-              Kode Undangan
-            </button>
-          </div>
 
-          <!-- Tab: Invite by User ID -->
-          <div v-if="activeTab === 'invite'" class="tab-content">
-            <div class="form-group">
-              <label>User ID <span class="req">*</span></label>
-              <div class="input-row">
-                <input v-model="localInviteUserId" type="text" placeholder="Masukkan User ID anggota" />
-                <button class="btn-inline" :disabled="inviting || !localInviteUserId.trim()" @click="handleInvite">
-                  <svg v-if="!inviting" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-                    <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-                  </svg>
-                  <svg v-else class="spin" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-                    <path d="M12 3a9 9 0 1 0 9 9"/>
-                  </svg>
-                  Kirim
-                </button>
+          <!-- ✅ Hanya tampil jika leader -->
+          <template v-if="isLeader">
+            <div class="member-tabs">
+              <button class="member-tab" :class="{ active: activeTab === 'invite' }" @click="activeTab = 'invite'">
+                Invite by User ID
+              </button>
+              <button class="member-tab" :class="{ active: activeTab === 'code' }" @click="activeTab = 'code'">
+                Kode Undangan
+              </button>
+            </div>
+
+            <!-- Tab: Invite by User ID -->
+            <div v-if="activeTab === 'invite'" class="tab-content">
+              <div class="form-group">
+                <label>User ID <span class="req">*</span></label>
+                <div class="input-row">
+                  <input v-model="localInviteUserId" type="text" placeholder="Masukkan User ID anggota" />
+                  <button class="btn-inline" :disabled="inviting || !localInviteUserId.trim()" @click="handleInvite">
+                    <svg v-if="!inviting" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                      <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
+                    <svg v-else class="spin" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                      <path d="M12 3a9 9 0 1 0 9 9"/>
+                    </svg>
+                    Kirim
+                  </button>
+                </div>
+                <p class="field-hint">User ID dapat ditemukan di halaman profil pengguna.</p>
               </div>
-              <p class="field-hint">User ID dapat ditemukan di halaman profil pengguna.</p>
-            </div>
-            <div v-if="inviteMessage" class="feedback-msg" :class="inviteSuccess ? 'feedback-ok' : 'feedback-err'">
-              {{ inviteMessage }}
-            </div>
-          </div>
-
-          <!-- Tab: Kode Undangan -->
-          <div v-if="activeTab === 'code'" class="tab-content">
-            <div v-if="generatedCode" class="code-display">
-              <span class="code-display-label">Kode Undangan Aktif</span>
-              <div class="code-display-row">
-                <span class="code-display-text">{{ generatedCode }}</span>
-                <button class="btn-copy" :class="{ copied: codeCopied }" @click="$emit('copy-code')">
-                  <svg v-if="!codeCopied" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-                  </svg>
-                  <svg v-else width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-                    <polyline points="20 6 9 17 4 12"/>
-                  </svg>
-                  {{ codeCopied ? 'Tersalin!' : 'Salin' }}
-                </button>
+              <div v-if="inviteMessage" class="feedback-msg" :class="inviteSuccess ? 'feedback-ok' : 'feedback-err'">
+                {{ inviteMessage }}
               </div>
-              <span class="code-display-expires">Berlaku 7 hari sejak dibuat</span>
             </div>
 
-            <div v-else class="code-empty">
-              <div class="code-empty-icon">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
-                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            <!-- Tab: Kode Undangan -->
+            <div v-if="activeTab === 'code'" class="tab-content">
+              <div v-if="generatedCode" class="code-display">
+                <span class="code-display-label">Kode Undangan Aktif</span>
+                <div class="code-display-row">
+                  <span class="code-display-text">{{ generatedCode }}</span>
+                  <button class="btn-copy" :class="{ copied: codeCopied }" @click="$emit('copy-code')">
+                    <svg v-if="!codeCopied" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                    </svg>
+                    <svg v-else width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    {{ codeCopied ? 'Tersalin!' : 'Salin' }}
+                  </button>
+                </div>
+                <span class="code-display-expires">Berlaku 7 hari sejak dibuat</span>
+              </div>
+
+              <div v-else class="code-empty">
+                <div class="code-empty-icon">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                  </svg>
+                </div>
+                <p>Belum ada kode undangan aktif</p>
+              </div>
+
+              <button class="btn-generate" :disabled="generatingCode" @click="$emit('generate-code')">
+                <svg v-if="!generatingCode" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                  <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
+                  <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
                 </svg>
-              </div>
-              <p>Belum ada kode undangan aktif</p>
+                <svg v-else class="spin" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                  <path d="M12 3a9 9 0 1 0 9 9"/>
+                </svg>
+                {{ generatingCode ? 'Membuat...' : generatedCode ? 'Generate Ulang' : 'Generate Kode' }}
+              </button>
             </div>
+          </template>
 
-            <button class="btn-generate" :disabled="generatingCode" @click="$emit('generate-code')">
-              <svg v-if="!generatingCode" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-                <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
-                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
-              </svg>
-              <svg v-else class="spin" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-                <path d="M12 3a9 9 0 1 0 9 9"/>
-              </svg>
-              {{ generatingCode ? 'Membuat...' : generatedCode ? 'Generate Ulang' : 'Generate Kode' }}
-            </button>
+          <!-- ✅ Info badge jika hanya member -->
+          <div v-else class="member-only-notice">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            Hanya leader yang dapat menambahkan atau mengeluarkan anggota.
           </div>
 
           <!-- Member List -->
@@ -120,7 +131,13 @@
                 <span class="member-role" :class="member.role === 'leader' ? 'role-leader' : 'role-member'">
                   {{ member.role === 'leader' ? 'Leader' : 'Member' }}
                 </span>
-                <button v-if="member.role !== 'leader'" class="btn-kick" title="Keluarkan" @click="$emit('kick', member.user_id)">
+                <!-- ✅ Tombol kick hanya muncul untuk leader -->
+                <button
+                  v-if="isLeader && member.role !== 'leader'"
+                  class="btn-kick"
+                  title="Keluarkan"
+                  @click="$emit('kick', member.user_id)"
+                >
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
                     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
                     <polyline points="16 17 21 12 16 7"/>
@@ -130,6 +147,7 @@
               </div>
             </div>
           </div>
+
         </div>
       </div>
     </div>
@@ -151,6 +169,7 @@ const props = defineProps<{
   projectTitle?: string
   members: ProjectMember[]
   loadingMembers: boolean
+  isLeader: boolean        // ✅ prop baru
   inviting: boolean
   inviteMessage: string
   inviteSuccess: boolean
@@ -274,6 +293,19 @@ const getInitial = (name?: string) => (name ? name.charAt(0).toUpperCase() : '?'
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+/* ✅ Notice untuk member biasa */
+.member-only-notice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: rgba(99, 102, 241, 0.06);
+  border: 1px solid rgba(99, 102, 241, 0.15);
+  border-radius: 10px;
+  font-size: 0.77rem;
+  color: #818cf8;
 }
 
 .member-tabs {

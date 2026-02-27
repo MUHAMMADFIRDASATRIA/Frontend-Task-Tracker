@@ -1,69 +1,85 @@
 <template>
-  <div class="stats-grid">
-    <div class="stat-card stat-card-green">
-      <div class="card-glow card-glow-green"></div>
-      <div class="card-inner">
-        <div class="icon-wrap icon-wrap-green">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="20 6 9 17 4 12"/>
-          </svg>
-        </div>
-        <p class="stat-label">Selesai</p>
-        <p class="stat-value">
-          <span class="stat-number">{{ completed }}</span>
-          <span class="stat-unit">tugas</span>
-        </p>
-        <div class="stat-bar">
-          <div class="stat-bar-fill stat-bar-green" :style="{ width: progress + '%' }"></div>
-        </div>
-      </div>
+  <div class="stats-wrapper">
+    <!-- Button Anggota di atas kanan -->
+    <div class="stats-header">
+      <button class="btn-members" @click.stop="$emit('manage-members')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+        Anggota
+      </button>
     </div>
 
-    <div class="stat-card stat-card-amber">
-      <div class="card-glow card-glow-amber"></div>
-      <div class="card-inner">
-        <div class="icon-wrap icon-wrap-amber">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"/>
-            <line x1="12" y1="8" x2="12" y2="12"/>
-            <line x1="12" y1="16" x2="12.01" y2="16"/>
-          </svg>
-        </div>
-        <p class="stat-label">Tertunda</p>
-        <p class="stat-value">
-          <span class="stat-number">{{ pending }}</span>
-          <span class="stat-unit">tugas</span>
-        </p>
-        <div class="stat-bar">
-          <div class="stat-bar-fill stat-bar-amber" :style="{ width: (pending / (completed + pending) * 100) + '%' }"></div>
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+      <div class="stat-card stat-card-green">
+        <div class="card-glow card-glow-green"></div>
+        <div class="card-inner">
+          <div class="icon-wrap icon-wrap-green">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </div>
+          <p class="stat-label">Selesai</p>
+          <p class="stat-value">
+            <span class="stat-number">{{ completed }}</span>
+            <span class="stat-unit">tugas</span>
+          </p>
+          <div class="stat-bar">
+            <div class="stat-bar-fill stat-bar-green" :style="{ width: progress + '%' }"></div>
+          </div>
         </div>
       </div>
-    </div>
 
-    <div class="stat-card stat-card-cyan">
-      <div class="card-glow card-glow-cyan"></div>
-      <div class="card-inner">
-        <div class="icon-wrap icon-wrap-cyan">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="18" y1="20" x2="18" y2="10"/>
-            <line x1="12" y1="20" x2="12" y2="4"/>
-            <line x1="6" y1="20" x2="6" y2="14"/>
-          </svg>
+      <div class="stat-card stat-card-amber">
+        <div class="card-glow card-glow-amber"></div>
+        <div class="card-inner">
+          <div class="icon-wrap icon-wrap-amber">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+          </div>
+          <p class="stat-label">Tertunda</p>
+          <p class="stat-value">
+            <span class="stat-number">{{ pending }}</span>
+            <span class="stat-unit">tugas</span>
+          </p>
+          <div class="stat-bar">
+            <div class="stat-bar-fill stat-bar-amber" :style="{ width: (pending / (completed + pending) * 100) + '%' }"></div>
+          </div>
         </div>
-        <p class="stat-label">Progress</p>
-        <p class="stat-value">
-          <span class="stat-number">{{ progress }}</span>
-          <span class="stat-unit">%</span>
-        </p>
-        <div class="progress-ring-wrap">
-          <svg class="progress-ring" width="40" height="40" viewBox="0 0 40 40">
-            <circle class="ring-track" cx="20" cy="20" r="16" />
-            <circle
-              class="ring-fill ring-fill-cyan"
-              cx="20" cy="20" r="16"
-              :style="{ strokeDashoffset: 100.5 - (progress / 100) * 100.5 }"
-            />
-          </svg>
+      </div>
+
+      <div class="stat-card stat-card-cyan">
+        <div class="card-glow card-glow-cyan"></div>
+        <div class="card-inner">
+          <div class="icon-wrap icon-wrap-cyan">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="20" x2="18" y2="10"/>
+              <line x1="12" y1="20" x2="12" y2="4"/>
+              <line x1="6" y1="20" x2="6" y2="14"/>
+            </svg>
+          </div>
+          <p class="stat-label">Progress</p>
+          <p class="stat-value">
+            <span class="stat-number">{{ progress }}</span>
+            <span class="stat-unit">%</span>
+          </p>
+          <div class="progress-ring-wrap">
+            <svg class="progress-ring" width="40" height="40" viewBox="0 0 40 40">
+              <circle class="ring-track" cx="20" cy="20" r="16" />
+              <circle
+                class="ring-fill ring-fill-cyan"
+                cx="20" cy="20" r="16"
+                :style="{ strokeDashoffset: 100.5 - (progress / 100) * 100.5 }"
+              />
+            </svg>
+          </div>
         </div>
       </div>
     </div>
@@ -76,23 +92,67 @@ defineProps<{
   pending: number
   progress: number
 }>()
+
+defineEmits<{
+  (e: 'manage-members'): void
+}>()
 </script>
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@400;600;700&display=swap');
 
+.stats-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-family: 'Sora', sans-serif;
+}
+
+/* ── Header row with button ── */
+.stats-header {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-members {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  background: rgba(56, 189, 248, 0.08);
+  color: #38bdf8;
+  font-family: 'Sora', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s, border-color 0.2s, transform 0.15s;
+}
+
+.btn-members:hover {
+  background: rgba(56, 189, 248, 0.18);
+  border-color: rgba(56, 189, 248, 0.6);
+  transform: translateY(-1px);
+}
+
+.btn-members:active {
+  transform: translateY(0);
+}
+
+/* ── Grid ── */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 14px;
-  font-family: 'Sora', sans-serif;
 }
 
 /* ── Card Base ── */
 .stat-card {
   position: relative;
   border-radius: 20px;
-  padding: 1px; /* border trick via gradient wrapper */
+  padding: 1px;
   overflow: hidden;
   isolation: isolate;
   transition: transform 0.25s ease, box-shadow 0.25s ease;
@@ -143,9 +203,9 @@ defineProps<{
 }
 .stat-card:hover .card-glow { opacity: 0.9; }
 
-.card-glow-green  { background: rgba(16, 185, 129, 0.5); }
-.card-glow-amber  { background: rgba(245, 158, 11, 0.5); }
-.card-glow-cyan   { background: rgba(6, 182, 212, 0.5); }
+.card-glow-green { background: rgba(16, 185, 129, 0.5); }
+.card-glow-amber { background: rgba(245, 158, 11, 0.5); }
+.card-glow-cyan  { background: rgba(6, 182, 212, 0.5); }
 
 /* ── Icon ── */
 .icon-wrap {
@@ -243,12 +303,6 @@ defineProps<{
 @media (max-width: 768px) {
   .stats-grid {
     grid-template-columns: 1fr;
-  }
-}
-
-@media (min-width: 769px) and (max-width: 1024px) {
-  .stats-grid {
-    grid-template-columns: repeat(3, 1fr);
   }
 }
 </style>
