@@ -247,7 +247,7 @@ const priorityClass = (priority?: string) => {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: #334155;
+  color: white;
 }
 
 /* ─── Body ─── */

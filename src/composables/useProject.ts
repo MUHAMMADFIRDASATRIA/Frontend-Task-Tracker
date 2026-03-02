@@ -157,13 +157,6 @@ export function useProject() {
               : []
 
             const myMember = members.find((m) => Number(m.user_id) === Number(user.value.id))
-
-            // Tambah ini sementara untuk debug
-            console.log('=== DEBUG ROLE ===')
-            console.log('user.value:', user.value)
-            console.log('user.value.id:', user.value.id)
-            console.log('members:', members)
-            console.log('myMember:', myMember)
             return {
               ...p,
               deadline: String((p as { tenggat?: unknown }).tenggat ?? ''),

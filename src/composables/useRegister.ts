@@ -36,26 +36,36 @@ export function useRegister() {
       message.value = ''
       success.value = false
 
-        try {
-        await api.post('/register', {
+      try {
+        const response = await api.post('/register', {
             name: name.value,
             email: email.value,
             password: password.value,
         })
+        const token = response.data?.api_token || response.data?.token
+
         success.value = true
-      message.value = 'Pendaftaran berhasil! Mengarahkan ke login...'
-        setTimeout(() => {
-            router.push('/dahsboard')
-        }, 1000)
+        message.value = token
+          ? 'Pendaftaran berhasil! Mengarahkan ke dashboard...'
+          : 'Pendaftaran berhasil! Mengarahkan ke login...'
+          setTimeout(() => {
+              if (token) {
+                localStorage.setItem('token', token)
+                router.push('/dashboard')
+                return
+              }
+
+              router.push('/')
+          }, 1000)
       } catch (err: unknown) {
-      error.value =
+        error.value =
         (err as ApiError).response?.data?.message || 'Gagal mendaftar. Silakan coba lagi.'
-      message.value = error.value
-      success.value = false
-        } finally{
+        message.value = error.value
+        success.value = false
+      } finally{
         loading.value = false
-        }
-    }
+      }
+  }
     
     return{
     name,

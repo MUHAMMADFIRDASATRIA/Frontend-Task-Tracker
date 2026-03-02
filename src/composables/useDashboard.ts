@@ -32,8 +32,12 @@ export function useDashboard() {
   const totalProjects = ref(0)
   const totalTasks = ref(0)
   const completedTasks = ref(0)
+  const progressTugas = ref(0)
+  const progressProyek = ref(0)
   const pendingTasks = ref(0)
   const loading = ref(true)
+  const progressPercentage = ref(0)
+  const progressPending = ref(0)
 
   const userInitial = computed(() =>
     user.value?.name ? user.value.name.charAt(0).toUpperCase() : 'A',
@@ -86,6 +90,10 @@ export function useDashboard() {
       totalTasks.value = allTasks.length
       completedTasks.value = allTasks.filter((task) => task.finish).length
       pendingTasks.value = totalTasks.value - completedTasks.value
+      progressTugas.value = totalTasks.value > 0 ? Math.round((completedTasks.value / totalTasks.value) * 100) : 0
+      progressPercentage.value = totalTasks.value > 0 ? Math.round((completedTasks.value / totalTasks.value) * 100) : 0
+      progressPending.value = totalTasks.value > 0 ? Math.round((pendingTasks.value / totalTasks.value) * 100) : 0
+      // progressProyek.value = totalProjects.value > 0 ? Math.round((completedTasks.value / totalProjects.value) * 100) : 0
       tasks.value = allTasks.slice(0, 10)
     } catch (error: unknown) {
       if ((error as ApiError).response?.status !== 401) {
@@ -95,7 +103,7 @@ export function useDashboard() {
       loading.value = false
     }
   }
-
+  
   const handleLogout = () => {
   localStorage.removeItem('token')
   router.push('/')
@@ -114,5 +122,9 @@ export function useDashboard() {
     currentDate,
     loadDashboard,
     handleLogout,
+    progressTugas,
+    progressPercentage,
+    progressPending,
+    // progressProyek,
   }
 }

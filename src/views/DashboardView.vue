@@ -14,8 +14,8 @@
         <div class="stats-grid">
           <StatCard title="Total Proyek" :value="totalProjects" icon="folder" color="blue" />
           <StatCard title="Total Tugas" :value="totalTasks" icon="list" color="purple" />
-          <StatCard title="Selesai" :value="completedTasks" icon="check" color="green" />
-          <StatCard title="Pending" :value="pendingTasks" icon="clock" color="orange" />
+          <StatCard title="Selesai" :value="completedTasks" :progress="progressPercentage" icon="check" color="green" />
+          <StatCard title="Pending" :value="pendingTasks" :pending="progressPending"icon="clock" color="orange" />
         </div>
 
         <!-- PROGRESS -->
@@ -56,6 +56,10 @@ const {
   userInitial,
   completionPercent,
   currentDate,
+  progressPercentage,
+  // progressProyek,
+  progressTugas,
+  progressPending,
   loadDashboard,
   handleLogout,
 } = useDashboard()

@@ -1,93 +1,115 @@
 <template>
   <div class="stats-wrapper">
-    <!-- Button Anggota di atas kanan -->
-    <div class="stats-header">
-      <button class="btn-members" @click.stop="$emit('manage-members')">
-        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-          <circle cx="9" cy="7" r="4"/>
-          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-        </svg>
-        Anggota
-      </button>
-    </div>
 
     <!-- Stats Grid -->
     <div class="stats-grid">
-      <div class="stat-card stat-card-green">
-        <div class="card-glow card-glow-green"></div>
-        <div class="card-inner">
-          <div class="icon-wrap icon-wrap-green">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="20 6 9 17 4 12"/>
-            </svg>
+
+      <!-- Card: Selesai -->
+      <div class="stat-card card-green">
+        <div class="card-bg-glow glow-green"></div>
+        <div class="card-content">
+          <div class="card-top">
+            <div class="icon-pill icon-green">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </div>
+            <span class="card-label">Selesai</span>
           </div>
-          <p class="stat-label">Selesai</p>
-          <p class="stat-value">
-            <span class="stat-number">{{ completed }}</span>
-            <span class="stat-unit">tugas</span>
-          </p>
-          <div class="stat-bar">
-            <div class="stat-bar-fill stat-bar-green" :style="{ width: progress + '%' }"></div>
+
+          <div class="card-value-row">
+            <span class="card-number">{{ completed }}</span>
+            <span class="card-unit">tugas</span>
           </div>
+
+          <div class="bar-track">
+            <div class="bar-fill bar-green" :style="{ width: clamp(progress) + '%' }"></div>
+          </div>
+          <span class="bar-label">{{ progress }}% dari total</span>
         </div>
+        <div class="corner-accent accent-green"></div>
       </div>
 
-      <div class="stat-card stat-card-amber">
-        <div class="card-glow card-glow-amber"></div>
-        <div class="card-inner">
-          <div class="icon-wrap icon-wrap-amber">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="12" y1="8" x2="12" y2="12"/>
-              <line x1="12" y1="16" x2="12.01" y2="16"/>
-            </svg>
+      <!-- Card: Tertunda -->
+      <div class="stat-card card-amber">
+        <div class="card-bg-glow glow-amber"></div>
+        <div class="card-content">
+          <div class="card-top">
+            <div class="icon-pill icon-amber">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+            </div>
+            <span class="card-label">Tertunda</span>
           </div>
-          <p class="stat-label">Tertunda</p>
-          <p class="stat-value">
-            <span class="stat-number">{{ pending }}</span>
-            <span class="stat-unit">tugas</span>
-          </p>
-          <div class="stat-bar">
-            <div class="stat-bar-fill stat-bar-amber" :style="{ width: (pending / (completed + pending) * 100) + '%' }"></div>
+
+          <div class="card-value-row">
+            <span class="card-number">{{ pending }}</span>
+            <span class="card-unit">tugas</span>
           </div>
+
+          <div class="bar-track">
+            <div class="bar-fill bar-amber" :style="{ width: clamp(pendingPercent) + '%' }"></div>
+          </div>
+          <span class="bar-label">{{ Math.round(pendingPercent) }}% dari total</span>
         </div>
+        <div class="corner-accent accent-amber"></div>
       </div>
 
-      <div class="stat-card stat-card-cyan">
-        <div class="card-glow card-glow-cyan"></div>
-        <div class="card-inner">
-          <div class="icon-wrap icon-wrap-cyan">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="18" y1="20" x2="18" y2="10"/>
-              <line x1="12" y1="20" x2="12" y2="4"/>
-              <line x1="6" y1="20" x2="6" y2="14"/>
-            </svg>
+      <!-- Card: Progress + Tombol Anggota -->
+      <div class="stat-card card-cyan">
+        <div class="card-bg-glow glow-cyan"></div>
+        <div class="card-content">
+          <div class="card-top">
+            <div class="icon-pill icon-cyan">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="20" x2="18" y2="10"/>
+                <line x1="12" y1="20" x2="12" y2="4"/>
+                <line x1="6" y1="20" x2="6" y2="14"/>
+              </svg>
+            </div>
+            <span class="card-label">Progress</span>
+            <button class="btn-members" @click.stop="$emit('manage-members')">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+              Anggota
+            </button>
           </div>
-          <p class="stat-label">Progress</p>
-          <p class="stat-value">
-            <span class="stat-number">{{ progress }}</span>
-            <span class="stat-unit">%</span>
-          </p>
-          <div class="progress-ring-wrap">
-            <svg class="progress-ring" width="40" height="40" viewBox="0 0 40 40">
-              <circle class="ring-track" cx="20" cy="20" r="16" />
-              <circle
-                class="ring-fill ring-fill-cyan"
-                cx="20" cy="20" r="16"
-                :style="{ strokeDashoffset: 100.5 - (progress / 100) * 100.5 }"
-              />
-            </svg>
+
+          <div class="progress-center">
+            <div class="ring-wrap">
+              <svg width="76" height="76" viewBox="0 0 76 76" class="ring-svg">
+                <circle class="ring-track" cx="38" cy="38" r="30"/>
+                <circle
+                  class="ring-fill-circle"
+                  cx="38" cy="38" r="30"
+                  :style="{ strokeDashoffset: ringOffset }"
+                />
+              </svg>
+              <div class="ring-inner-text">
+                <span class="ring-number">{{ progress }}</span>
+                <span class="ring-pct">%</span>
+              </div>
+            </div>
           </div>
         </div>
+        <div class="corner-accent accent-cyan"></div>
       </div>
+
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-defineProps<{
+import { computed } from 'vue'
+
+const props = defineProps<{
   completed: number
   pending: number
   progress: number
@@ -96,213 +118,270 @@ defineProps<{
 defineEmits<{
   (e: 'manage-members'): void
 }>()
+
+const clamp = (val: number) => Math.min(Math.max(val, 0), 100)
+
+const pendingPercent = computed(() => {
+  const total = props.completed + props.pending
+  if (total === 0) return 0
+  return (props.pending / total) * 100
+})
+
+// Circumference of r=30: 2 * π * 30 ≈ 188.5
+const CIRCUMFERENCE = 188.5
+const ringOffset = computed(() => {
+  const pct = clamp(props.progress) / 100
+  return CIRCUMFERENCE - pct * CIRCUMFERENCE
+})
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500;600&family=Sora:wght@400;500;600;700&display=swap');
 
 .stats-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
   font-family: 'Sora', sans-serif;
 }
 
-/* ── Header row with button ── */
-.stats-header {
-  display: flex;
-  justify-content: flex-end;
-}
-
-.btn-members {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  padding: 8px 16px;
-  border-radius: 10px;
-  border: 1px solid rgba(56, 189, 248, 0.35);
-  background: rgba(56, 189, 248, 0.08);
-  color: #38bdf8;
-  font-family: 'Sora', sans-serif;
-  font-size: 0.82rem;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background 0.2s, border-color 0.2s, transform 0.15s;
-}
-
-.btn-members:hover {
-  background: rgba(56, 189, 248, 0.18);
-  border-color: rgba(56, 189, 248, 0.6);
-  transform: translateY(-1px);
-}
-
-.btn-members:active {
-  transform: translateY(0);
-}
-
-/* ── Grid ── */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 14px;
 }
 
-/* ── Card Base ── */
+/* ── Card ── */
 .stat-card {
   position: relative;
-  border-radius: 20px;
-  padding: 1px;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: #0b111f;
   overflow: hidden;
   isolation: isolate;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-}
-
-.stat-card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 20px;
-  padding: 1px;
-  background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.03) 100%);
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
 }
 
 .stat-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  transform: translateY(-4px);
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.45);
 }
 
-.card-inner {
-  position: relative;
-  z-index: 1;
-  padding: 20px;
-  border-radius: 19px;
-  background: #0f172a;
-  height: 100%;
-  box-sizing: border-box;
-}
+.card-green:hover { border-color: rgba(16, 185, 129, 0.3); }
+.card-amber:hover { border-color: rgba(245, 158, 11, 0.3); }
+.card-cyan:hover  { border-color: rgba(6, 182, 212, 0.3); }
 
 /* ── Glow ── */
-.card-glow {
+.card-bg-glow {
   position: absolute;
-  width: 120px;
-  height: 120px;
+  width: 180px;
+  height: 180px;
   border-radius: 50%;
-  filter: blur(40px);
-  top: -20px;
-  right: -20px;
+  filter: blur(55px);
+  top: -55px;
+  right: -55px;
   z-index: 0;
   pointer-events: none;
-  opacity: 0.6;
+  opacity: 0.3;
   transition: opacity 0.3s;
 }
-.stat-card:hover .card-glow { opacity: 0.9; }
 
-.card-glow-green { background: rgba(16, 185, 129, 0.5); }
-.card-glow-amber { background: rgba(245, 158, 11, 0.5); }
-.card-glow-cyan  { background: rgba(6, 182, 212, 0.5); }
+.stat-card:hover .card-bg-glow { opacity: 0.55; }
+
+.glow-green { background: rgba(16, 185, 129, 1); }
+.glow-amber { background: rgba(245, 158, 11, 1); }
+.glow-cyan  { background: rgba(6, 182, 212, 1); }
+
+/* ── Corner accent ── */
+.corner-accent {
+  position: absolute;
+  bottom: -24px;
+  left: -24px;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  opacity: 0.06;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.accent-green { background: #10b981; }
+.accent-amber { background: #f59e0b; }
+.accent-cyan  { background: #06b6d4; }
+
+/* ── Content ── */
+.card-content {
+  position: relative;
+  z-index: 1;
+  padding: 20px 20px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ── Top row ── */
+.card-top {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
 
 /* ── Icon ── */
-.icon-wrap {
+.icon-pill {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 10px;
-  margin-bottom: 14px;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  flex-shrink: 0;
+  border: 1px solid transparent;
 }
 
-.icon-wrap-green { background: rgba(16, 185, 129, 0.18); color: #34d399; }
-.icon-wrap-amber { background: rgba(245, 158, 11, 0.18); color: #fbbf24; }
-.icon-wrap-cyan  { background: rgba(6, 182, 212, 0.18);  color: #22d3ee; }
+.icon-green { background: rgba(16,185,129,0.14); color: #34d399; border-color: rgba(16,185,129,0.22); }
+.icon-amber { background: rgba(245,158,11,0.14);  color: #fbbf24; border-color: rgba(245,158,11,0.22); }
+.icon-cyan  { background: rgba(6,182,212,0.14);   color: #22d3ee; border-color: rgba(6,182,212,0.22); }
 
 /* ── Label ── */
-.stat-label {
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
+.card-label {
+  font-size: 0.67rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #64748b;
-  margin: 0 0 6px;
+  color: #475569;
+  flex: 1;
 }
 
 /* ── Value ── */
-.stat-value {
+.card-value-row {
   display: flex;
   align-items: baseline;
-  gap: 5px;
-  margin: 0 0 14px;
+  gap: 7px;
 }
 
-.stat-number {
+.card-number {
   font-family: 'DM Mono', monospace;
-  font-size: 2rem;
-  font-weight: 500;
+  font-size: 2.5rem;
+  font-weight: 600;
   color: #f1f5f9;
   line-height: 1;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.04em;
 }
 
-.stat-unit {
-  font-size: 0.78rem;
-  color: #475569;
-  font-weight: 400;
+.card-unit {
+  font-size: 0.73rem;
+  color: #334155;
+  font-weight: 500;
 }
 
-/* ── Progress bar ── */
-.stat-bar {
-  height: 4px;
-  border-radius: 99px;
-  background: rgba(255, 255, 255, 0.07);
+/* ── Bar ── */
+.bar-track {
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
   overflow: hidden;
 }
 
-.stat-bar-fill {
+.bar-fill {
   height: 100%;
-  border-radius: 99px;
-  transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  border-radius: 999px;
+  transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+  min-width: 0;
 }
 
-.stat-bar-green { background: linear-gradient(90deg, #059669, #34d399); }
-.stat-bar-amber { background: linear-gradient(90deg, #d97706, #fbbf24); }
+.bar-green { background: linear-gradient(90deg, #059669, #34d399); box-shadow: 0 0 8px rgba(52,211,153,0.4); }
+.bar-amber { background: linear-gradient(90deg, #d97706, #fbbf24); box-shadow: 0 0 8px rgba(251,191,36,0.4); }
+
+.bar-label {
+  font-size: 0.65rem;
+  color: #334155;
+  margin-top: -5px;
+}
 
 /* ── Ring ── */
-.progress-ring-wrap {
-  position: absolute;
-  bottom: 18px;
-  right: 18px;
+.progress-center {
+  display: flex;
+  justify-content: center;
+  padding: 2px 0 4px;
 }
 
-.progress-ring {
+.ring-wrap {
+  position: relative;
+  width: 76px;
+  height: 76px;
+}
+
+.ring-svg {
   transform: rotate(-90deg);
 }
 
 .ring-track {
   fill: none;
-  stroke: rgba(255,255,255,0.07);
-  stroke-width: 3;
+  stroke: rgba(255, 255, 255, 0.07);
+  stroke-width: 5;
 }
 
-.ring-fill {
+.ring-fill-circle {
   fill: none;
-  stroke-width: 3;
+  stroke: #22d3ee;
+  stroke-width: 5;
   stroke-linecap: round;
-  stroke-dasharray: 100.5;
-  transition: stroke-dashoffset 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+  stroke-dasharray: 188.5;
+  transition: stroke-dashoffset 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+  filter: drop-shadow(0 0 5px rgba(34, 211, 238, 0.55));
 }
 
-.ring-fill-cyan { stroke: #22d3ee; }
+.ring-inner-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+}
+
+.ring-number {
+  font-family: 'DM Mono', monospace;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #f1f5f9;
+  line-height: 1;
+}
+
+.ring-pct {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  color: #475569;
+  align-self: flex-end;
+  padding-bottom: 2px;
+}
+
+/* ── Tombol Anggota ── */
+.btn-members {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(6, 182, 212, 0.28);
+  background: rgba(6, 182, 212, 0.07);
+  color: #22d3ee;
+  font-family: 'Sora', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.18s, border-color 0.18s, transform 0.15s;
+  margin-left: auto;
+}
+
+.btn-members:hover {
+  background: rgba(6, 182, 212, 0.15);
+  border-color: rgba(6, 182, 212, 0.5);
+  transform: translateY(-1px);
+}
+
+.btn-members:active { transform: translateY(0); }
 
 /* ── Responsive ── */
 @media (max-width: 768px) {
-  .stats-grid {
-    grid-template-columns: 1fr;
-  }
+  .stats-grid { grid-template-columns: 1fr; }
 }
 </style>

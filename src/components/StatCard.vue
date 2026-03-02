@@ -39,7 +39,13 @@
       <p class="stat-title">{{ title }}</p>
     </div>
     <h3 class="stat-value">{{ value }}</h3>
-    <div class="stat-bar"><div class="stat-bar-fill" :class="`bar-${color}`"></div></div>
+    <div class="stat-bar">
+      <div 
+        class="stat-bar-fill"
+        :class="`bar-${color}`"
+        :style="{ width: progress + '%' }"
+      ></div>
+    </div>
   </div>
 </template>
 
@@ -49,7 +55,9 @@ defineProps<{
   value: number
   icon?: string
   color?: string
+  progress?: number
 }>()
+
 </script>
 
 <style scoped>
@@ -122,7 +130,6 @@ defineProps<{
 }
 .stat-bar-fill {
   height: 100%;
-  width: 60%;
   border-radius: 999px;
 }
 .bar-blue {

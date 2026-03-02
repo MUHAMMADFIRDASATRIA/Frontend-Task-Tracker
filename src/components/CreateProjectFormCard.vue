@@ -83,7 +83,7 @@
           <p class="info-body">
             Status proyek diatur otomatis berdasarkan progress tugas:
             <span class="info-tag tag-pending">Pending</span>
-            <span class="info-tag tag-progress">In Progress</span>
+            <span class="info-tag tag-progress">Progress</span>
             <span class="info-tag tag-done">Completed</span>
           </p>
         </div>
