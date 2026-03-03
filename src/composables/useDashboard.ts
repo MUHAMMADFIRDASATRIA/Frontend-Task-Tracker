@@ -59,23 +59,22 @@ export function useDashboard() {
     loading.value = true
 
     try {
-      const profileRes = await api.get('/profile')
+      const profileRes = await api.get('/profile/show')
       user.value = (profileRes.data?.data as User) ?? {}
 
-      const projectRes = await api.get('/users/project')
+      const projectRes = await api.get('/project/show')
       const projects: Project[] = Array.isArray(projectRes.data?.data) ? projectRes.data.data : []
       totalProjects.value = projects.length
 
       const allTasks: Task[] = []
 
       for (const project of projects) {
-        const taskRes = await api.get(`/users/project/${project.id}/tasks`)
+        const taskRes = await api.get(`/tasks/show?project_id=${project.id}`)
         const projectTasks: Task[] = Array.isArray(taskRes.data?.data) ? taskRes.data.data : []
 
         projectTasks.forEach((task) => {
           task.projectTitle = project.title
 
-          // Normalize priority: backend might send numeric values or strings
           if (typeof task.priority === 'number') {
             const map: Record<number, string> = { 1: 'high', 2: 'medium', 3: 'low' }
             task.priority = map[task.priority as number] ?? String(task.priority)
@@ -93,8 +92,9 @@ export function useDashboard() {
       progressTugas.value = totalTasks.value > 0 ? Math.round((completedTasks.value / totalTasks.value) * 100) : 0
       progressPercentage.value = totalTasks.value > 0 ? Math.round((completedTasks.value / totalTasks.value) * 100) : 0
       progressPending.value = totalTasks.value > 0 ? Math.round((pendingTasks.value / totalTasks.value) * 100) : 0
-      // progressProyek.value = totalProjects.value > 0 ? Math.round((completedTasks.value / totalProjects.value) * 100) : 0
+      
       tasks.value = allTasks.slice(0, 10)
+      
     } catch (error: unknown) {
       if ((error as ApiError).response?.status !== 401) {
         console.error('Gagal memuat dashboard:', error)

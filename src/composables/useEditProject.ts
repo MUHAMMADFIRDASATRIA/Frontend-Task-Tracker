@@ -46,7 +46,7 @@ export function useEditProject() {
 
     const loadProfile = async () => {
       try {
-        const response = await api.get('/profile')
+        const response = await api.get('/profile/show')
         user.value = (response.data?.data as User) ?? { name: 'Pengguna' }
       } catch {
         user.value = { name: 'Pengguna' }
@@ -55,7 +55,7 @@ export function useEditProject() {
 
     const loadProject = async (id: string) => {
         try {
-            const response = await api.get(`/users/project/${id}`)
+            const response = await api.get(`/project/${id}`)
             const data = response.data?.data
             if (data) {
                 form.value = {
@@ -80,7 +80,7 @@ export function useEditProject() {
         alertMessage.value = ''
         alertSuccess.value = false
         try {
-            const response = await api.put(`/users/project/${id}/update`, form.value)
+            const response = await api.put(`/project/${id}/update`, form.value)
 
             if (response.status === 200) {
                 success.value = true

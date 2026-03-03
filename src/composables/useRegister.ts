@@ -31,8 +31,8 @@ export function useRegister() {
       success.value = false
       return
       }
-        loading.value = true
-        error.value = ''
+      loading.value = true
+      error.value = ''
       message.value = ''
       success.value = false
 
@@ -55,7 +55,7 @@ export function useRegister() {
                 return
               }
 
-              router.push('/')
+            router.push('/')
           }, 1000)
       } catch (err: unknown) {
         error.value =

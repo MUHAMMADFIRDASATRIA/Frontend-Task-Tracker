@@ -67,7 +67,7 @@ export function useEditProfile() {
     const loadProfile = async () => {
         loading.value = true
         try {
-            const response = await api.get('/profile')
+            const response = await api.get('/profile/show')
             user.value = (response.data?.data as User) ?? { name: 'Pengguna' }
 
             form.value.name = user.value.name ?? ''
@@ -115,7 +115,7 @@ export function useEditProfile() {
             if (photoFile.value) payload.append('profile_photo', photoFile.value)
             if (removePhotoRequested.value && !photoFile.value) payload.append('remove_photo', '1')
 
-            const response = await api.put('/profile/edit', payload, {
+            const response = await api.put('/profile/me/update', payload, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             })
 

@@ -32,6 +32,14 @@ interface Task {
   [key: string]: unknown
 }
 
+export interface Invitation {
+  id: number
+  project_title: string
+  project_id: number
+  invited_by_name: string
+  created_at: string
+}
+
 export interface ProjectMember {
   id: number
   user_id: number
@@ -73,9 +81,17 @@ export function useProject() {
   const joinCode = ref('')
   const joining = ref(false)
   const joinError = ref('')
+  const joinSuccess = ref(false)
+  const joinedProjectName = ref('')
 
   // ── Member Modal ──────────────────────────
   const showMemberModal = ref(false)
+
+  // ── Invitation Modal ─────────────────────
+  const showInvitationModal = ref(false)
+  const pendingInvitations = ref<Invitation[]>([])
+  const loadingInvitations = ref(false)
+  const inviteProcessingId = ref<number | null>(null)
   const selectedProject = ref<ProjectWithRole | null>(null)
   const memberTab = ref<'invite' | 'code'>('invite')
   const memberList = ref<ProjectMember[]>([])
@@ -120,12 +136,14 @@ export function useProject() {
     loading.value = true
     try {
       const results = await Promise.allSettled([
-        api.get('/profile'),
-        api.get('/users/project'),
+        api.get('/profile/show'),
+        api.get('/project/show'),
+        api.get('/invitations/show'),
       ])
 
       const profileRes = results[0].status === 'fulfilled' ? (results[0] as PromiseFulfilledResult<any>).value : null
       const projectRes = results[1].status === 'fulfilled' ? (results[1] as PromiseFulfilledResult<any>).value : null
+      const inviteRes  = results[2].status === 'fulfilled' ? (results[2] as PromiseFulfilledResult<any>).value : null
 
       if (profileRes) {
         user.value = (profileRes.data?.data as User) ?? {}
@@ -133,6 +151,10 @@ export function useProject() {
         user.value = {}
         console.error('Gagal memuat profile:', (results[0] as PromiseRejectedResult).reason)
       }
+
+      pendingInvitations.value = inviteRes && Array.isArray(inviteRes.data?.data)
+        ? inviteRes.data.data
+        : []
 
       const raw: Array<Record<string, unknown>> = projectRes && Array.isArray(projectRes.data?.data)
         ? projectRes.data.data
@@ -146,8 +168,8 @@ export function useProject() {
         raw.map(async (p) => {
           try {
             const [taskRes, memberRes] = await Promise.all([
-              api.get(`/users/project/${p.id}/tasks`),
-              api.get(`/users/project/${p.id}/members`),
+              api.get(`/tasks/show?project_id=${p.id}`),
+              api.get(`/members/show?project_id=${p.id}`),
             ])
 
             const tasks: Task[] = Array.isArray(taskRes.data?.data) ? taskRes.data.data : []
@@ -195,7 +217,7 @@ export function useProject() {
         description: data.description,
         tenggat: data.deadline,
       }
-      await api.post('/users/project/create', payload)
+      await api.post('/project/create', payload)
       showCreateModal.value = false
       await loadData()
     } catch (err: unknown) {
@@ -210,15 +232,71 @@ export function useProject() {
     if (joinCode.value.length < 8) return
     joining.value = true
     joinError.value = ''
+    joinSuccess.value = false
     try {
-      await api.post('/users/project/join', { code: joinCode.value })
-      showJoinModal.value = false
-      joinCode.value = ''
+      const res = await api.post('/project/me/join', { code: joinCode.value })
+      joinSuccess.value = true
+      joinedProjectName.value = res.data?.data?.project_title ?? ''
       await loadData()
-    } catch {
-      joinError.value = 'Kode tidak valid atau sudah kadaluarsa.'
+    } catch (err: any) {
+      joinError.value = err?.response?.data?.message ?? 'Kode tidak valid atau sudah kadaluarsa.'
     } finally {
       joining.value = false
+    }
+  }
+
+  const closeJoinModal = () => {
+    showJoinModal.value = false
+    joinCode.value = ''
+    joinError.value = ''
+    joinSuccess.value = false
+    joinedProjectName.value = ''
+  }
+
+  // ── Invitation actions ────────────────────
+  const fetchInvitations = async () => {
+    loadingInvitations.value = true
+    try {
+      const res = await api.get('/invitations/show')
+      pendingInvitations.value = Array.isArray(res.data?.data) ? res.data.data : []
+    } catch {
+      pendingInvitations.value = []
+    } finally {
+      loadingInvitations.value = false
+    }
+  }
+
+  const openInvitationModal = async () => {
+    showInvitationModal.value = true
+    await fetchInvitations()
+  }
+
+  const closeInvitationModal = () => {
+    showInvitationModal.value = false
+  }
+
+  const acceptInvitation = async (id: number) => {
+    inviteProcessingId.value = id
+    try {
+      await api.post(`/invitations/${id}/accept`)
+      pendingInvitations.value = pendingInvitations.value.filter((i) => i.id !== id)
+      await loadData()
+    } catch (err: any) {
+      console.error('Gagal menerima undangan:', err?.response?.data?.message)
+    } finally {
+      inviteProcessingId.value = null
+    }
+  }
+
+  const declineInvitation = async (id: number) => {
+    inviteProcessingId.value = id
+    try {
+      await api.post(`/invitations/${id}/decline`)
+      pendingInvitations.value = pendingInvitations.value.filter((i) => i.id !== id)
+    } catch (err: any) {
+      console.error('Gagal menolak undangan:', err?.response?.data?.message)
+    } finally {
+      inviteProcessingId.value = null
     }
   }
 
@@ -243,7 +321,7 @@ export function useProject() {
   const fetchMembers = async (projectId: number) => {
     loadingMembers.value = true
     try {
-      const res = await api.get(`/users/project/${projectId}/members`)
+      const res = await api.get(`/members/show?project_id=${projectId}`)
       memberList.value = Array.isArray(res.data?.data) ? res.data.data : []
     } catch {
       memberList.value = []
@@ -257,7 +335,7 @@ export function useProject() {
     inviting.value = true
     inviteMessage.value = ''
     try {
-      await api.post(`/users/project/${selectedProject.value.id}/invite`, {
+      await api.post(`/project/${selectedProject.value.id}/invite`, {
         user_id: inviteUserId.value,
       })
       inviteMessage.value = 'Undangan berhasil dikirim!'
@@ -297,7 +375,7 @@ export function useProject() {
     const confirmed = window.confirm('Keluarkan anggota ini dari proyek?')
     if (!confirmed) return
     try {
-      await api.delete(`/users/project/${selectedProject.value.id}/members/${userId}`)
+      await api.delete(`/members/${userId}?project_id=${selectedProject.value.id}`)
       memberList.value = memberList.value.filter((m) => m.user_id !== userId)
     } catch {
       //
@@ -312,7 +390,7 @@ export function useProject() {
     const confirmed = window.confirm('Hapus proyek ini? Tindakan ini tidak bisa dibatalkan.')
     if (!confirmed) return
     try {
-      await api.delete(`/users/project/${id}`)
+      await api.delete(`/project/${id}`)
       projects.value = projects.value.filter((project) => project.id !== id)
     } catch (err: unknown) {
       console.error('Gagal menghapus proyek:', err)
@@ -336,6 +414,17 @@ export function useProject() {
     joinCode,
     joining,
     joinError,
+    joinSuccess,
+    joinedProjectName,
+    closeJoinModal,
+    showInvitationModal,
+    pendingInvitations,
+    loadingInvitations,
+    inviteProcessingId,
+    openInvitationModal,
+    closeInvitationModal,
+    acceptInvitation,
+    declineInvitation,
     showMemberModal,
     selectedProject,
     memberTab,

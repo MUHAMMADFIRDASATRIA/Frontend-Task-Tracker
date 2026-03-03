@@ -55,7 +55,7 @@ export function useCreateProject() {
         alertMessage.value = ''
         alertSuccess.value = false
         try {
-          await api.post('/users/project/create', {
+          await api.post('/project/create', {
                 title: form.value.title,
                 description: form.value.description,
                 tenggat: form.value.tenggat,

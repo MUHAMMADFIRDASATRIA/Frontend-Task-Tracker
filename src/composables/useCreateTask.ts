@@ -56,8 +56,8 @@ export function useCreateTask() {
         loadingData.value = true
         try {
             const [profileRes, projectRes] = await Promise.all([
-                api.get('/profile'),
-                api.get(`/users/project/${projectId}`),
+                api.get('/profile/show'),
+                api.get(`/project/${projectId}`),
             ])
 
             user.value = (profileRes.data?.data as User) ?? { name: 'Pengguna' }
@@ -83,7 +83,8 @@ export function useCreateTask() {
         alertSuccess.value = false
 
         try {
-            await api.post(`/users/project/${projectId}/tasks/create`, {
+            await api.post(`/tasks/create`, {
+                project_id: projectId,
                 title: form.value.title,
                 description: form.value.description,
                 priority: form.value.priority,

@@ -81,9 +81,9 @@ export function useTasks() {
         loading.value = true
         try {
         const [projectRes, taskRes, userRes, memberRes] = await Promise.all([
-        api.get(`/users/project/${projectId}`),
-        api.get(`/users/project/${projectId}/tasks`),
-        api.get(`/profile`),
+        api.get(`/project/${projectId}`),
+        api.get(`/tasks/show?project_id=${projectId}`),
+        api.get(`/profile/show`),
         api.get(`/users/project/${projectId}/members`),
         ])
 
@@ -134,7 +134,7 @@ export function useTasks() {
     try {
         if (!projectId) return
 
-        await api.patch(`/users/project/${projectId}/tasks/${task.id}/finish`, {
+        await api.patch(`/tasks/${task.id}/finish`, {
         finish: task.finish
         })
     } catch (error) {
@@ -147,10 +147,10 @@ export function useTasks() {
     }
 
     const goToAddTask = () => {
-            router.push(`/projects/${projectId}/tasks/create`)
-        }
+        router.push(`/projects/${projectId}/tasks/create`)
+    }
 
-        const goToEditTask = (task: Task) => {
+    const goToEditTask = (task: Task) => {
             if (!projectId || !task?.id) return
             router.push(`/projects/${projectId}/tasks/${task.id}/edit`)
         }
@@ -165,7 +165,7 @@ export function useTasks() {
             tasks.value = tasks.value.filter((item) => item.id !== task.id)
 
             try {
-                await api.delete(`/users/project/${projectId}/tasks/${task.id}`)
+                await api.delete(`/tasks/${task.id}`)
             } catch (error) {
                 console.error(error)
                 tasks.value = previousTasks

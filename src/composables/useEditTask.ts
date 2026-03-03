@@ -82,7 +82,7 @@ export function useEditTask() {
 
     const loadTask = async () => {
         try {
-            const response = await api.get(`/users/project/${projectId}/tasks/${taskId}`)
+            const response = await api.get(`/task/${taskId}`)
             const data = response.data?.data
             if (data) {
                 form.value = {
@@ -111,7 +111,7 @@ export function useEditTask() {
         alertMessage.value = ''
         alertSuccess.value = false
         try {
-            await api.put(`/users/project/${projectId}/tasks/${taskId}`, {
+            await api.put(`/task/${taskId}/update`, {
                 title: form.value.title,
                 description: form.value.description,
                 priority: form.value.priority,

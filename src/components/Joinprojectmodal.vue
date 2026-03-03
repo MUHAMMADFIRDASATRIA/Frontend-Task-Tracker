@@ -23,7 +23,31 @@
           </button>
         </div>
 
-        <div class="modal-form">
+        <!-- Success State -->
+        <div v-if="joinSuccess" class="success-body">
+          <div class="success-icon-wrap">
+            <div class="success-ring"></div>
+            <svg class="success-check" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </div>
+          <h3 class="success-title">Berhasil Bergabung!</h3>
+          <p class="success-desc">
+            <template v-if="joinedProjectName">Kamu sekarang menjadi anggota proyek <strong>{{ joinedProjectName }}</strong>.</template>
+            <template v-else>Kamu berhasil bergabung dengan proyek.</template>
+          </p>
+          <div class="success-actions">
+            <button class="btn-green" @click="$emit('close')">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              Lihat Proyek
+            </button>
+          </div>
+        </div>
+
+        <!-- Form State -->
+        <div v-else class="modal-form">
           <div class="join-illustration">
             <div class="code-dots">
               <span v-for="n in 8" :key="n" class="code-dot" :style="{ animationDelay: (n * 0.1) + 's' }"></span>
@@ -78,6 +102,8 @@ const props = defineProps<{
   joining: boolean
   error: string
   modelValue: string
+  joinSuccess?: boolean
+  joinedProjectName?: string
 }>()
 
 const emit = defineEmits<{
@@ -322,4 +348,76 @@ const handleJoin = () => {
 
 @keyframes spin { to { transform: rotate(360deg); } }
 .spin { animation: spin 0.8s linear infinite; }
+
+/* ── Success State ── */
+.success-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 36px 24px 28px;
+  gap: 14px;
+  text-align: center;
+}
+
+.success-icon-wrap {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.success-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(16, 185, 129, 0.25);
+  background: rgba(16, 185, 129, 0.08);
+  animation: ring-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.success-check {
+  color: #34d399;
+  position: relative;
+  z-index: 1;
+  animation: check-draw 0.35s ease 0.1s both;
+}
+
+@keyframes ring-pop {
+  from { transform: scale(0.5); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+
+@keyframes check-draw {
+  from { opacity: 0; transform: scale(0.6); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.success-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin: 0;
+}
+
+.success-desc {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.55;
+  max-width: 300px;
+}
+
+.success-desc strong {
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.success-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
 </style>
