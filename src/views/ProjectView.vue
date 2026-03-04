@@ -15,7 +15,7 @@
           title="Proyek Saya"
           subtitle="Kelola dan pantau semua proyek Anda"
         >
-          <button class="btn-join-outline" @click="openInvitationModal">
+          <!-- <button class="btn-join-outline" @click="openInvitationModal">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
               <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
@@ -29,7 +29,7 @@
               <line x1="15" y1="12" x2="3" y2="12"/>
             </svg>
             Gabung Proyek
-          </button>
+          </button> -->
           <RouterLink class="btn-primary" to="/projects/create">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
               <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>

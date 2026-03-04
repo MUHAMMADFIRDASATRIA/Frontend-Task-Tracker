@@ -84,7 +84,7 @@ export function useTasks() {
         api.get(`/project/${projectId}`),
         api.get(`/tasks/show?project_id=${projectId}`),
         api.get(`/profile/show`),
-        api.get(`/users/project/${projectId}/members`),
+        api.get(`/members/${projectId}`),
         ])
 
         project.value = (projectRes.data?.data as Project) ?? undefined

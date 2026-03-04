@@ -353,7 +353,7 @@ export function useProject() {
     if (!selectedProject.value) return
     generatingCode.value = true
     try {
-      const res = await api.post(`/users/project/${selectedProject.value.id}/generate-code`)
+      const res = await api.post(`/project/${selectedProject.value.id}/generateCode`)
       generatedCode.value = res.data?.data?.code ?? ''
       codeCopied.value = false
     } catch {

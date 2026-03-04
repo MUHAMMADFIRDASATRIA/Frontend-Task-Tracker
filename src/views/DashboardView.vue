@@ -10,7 +10,7 @@
       />
 
       <div class="content-body">
-        <!-- STATS -->
+
         <div class="stats-grid">
           <StatCard title="Total Proyek" :value="totalProjects" icon="folder" color="blue" />
           <StatCard title="Total Tugas" :value="totalTasks" icon="list" color="purple" />
@@ -18,7 +18,6 @@
           <StatCard title="Pending" :value="pendingTasks" :pending="progressPending"icon="clock" color="orange" />
         </div>
 
-        <!-- PROGRESS -->
         <ProgressCard
           v-if="totalTasks > 0"
           :completion-percent="completionPercent"
@@ -26,7 +25,6 @@
           :total-tasks="totalTasks"
         />
 
-        <!-- TABLE -->
         <TaskTable :tasks="tasks" :loading="loading" />
       </div>
     </main>

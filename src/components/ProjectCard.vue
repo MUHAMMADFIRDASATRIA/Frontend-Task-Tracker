@@ -11,7 +11,7 @@
             />
           </svg>
         </div>
-        <span class="role-badge" :class="project.role === 'leader' ? 'badge-leader' : 'badge-member'">
+        <!-- <span class="role-badge" :class="project.role === 'leader' ? 'badge-leader' : 'badge-member'">
           <svg v-if="project.role === 'leader'" width="9" height="9" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
           </svg>
@@ -19,7 +19,7 @@
             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
           </svg>
           {{ project.role === 'leader' ? 'Leader' : 'Member' }}
-        </span>
+        </span> -->
       </div>
       <span :class="['status-badge', statusClass(project)]">{{ statusLabel(project) }}</span>
     </div>
@@ -56,13 +56,13 @@
 
     <!-- Actions: hanya tampil untuk leader -->
     <div v-if="project.role === 'leader'" class="card-actions">
-      <button class="btn-action btn-members" @click.stop="$emit('manage-members', project)">
+      <!-- <button class="btn-action btn-members" @click.stop="$emit('manage-members', project)">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
           <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
         </svg>
         Anggota
-      </button>
+      </button> -->
       <button class="btn-action btn-edit" @click.stop="$emit('edit', project.id)">Edit</button>
       <button class="btn-action btn-delete" @click.stop="$emit('delete', project.id)">Hapus</button>
     </div>
