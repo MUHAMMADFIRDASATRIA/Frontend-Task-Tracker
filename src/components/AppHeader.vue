@@ -6,7 +6,7 @@
     </div>
 
     <div class="header-right">
-      <!-- <div class="date-badge">{{ currentDate }}</div> -->
+      <div class="date-badge">{{ currentDate }}</div>
       <div class="header-avatar">
         <img
           v-if="profilePhotoUrl && !avatarError"

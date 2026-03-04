@@ -24,7 +24,6 @@
 
         <div class="modal-form">
 
-          <!-- ✅ Hanya tampil jika leader -->
           <template v-if="isLeader">
             <div class="member-tabs">
               <button class="member-tab" :class="{ active: activeTab === 'invite' }" @click="activeTab = 'invite'">
@@ -35,7 +34,6 @@
               </button>
             </div>
 
-            <!-- Tab: Invite by User ID -->
             <div v-if="activeTab === 'invite'" class="tab-content">
               <div class="form-group">
                 <label>User ID <span class="req">*</span></label>
@@ -58,7 +56,6 @@
               </div>
             </div>
 
-            <!-- Tab: Kode Undangan -->
             <div v-if="activeTab === 'code'" class="tab-content">
               <div v-if="generatedCode" class="code-display">
                 <span class="code-display-label">Kode Undangan Aktif</span>

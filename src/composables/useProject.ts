@@ -278,7 +278,7 @@ export function useProject() {
   const acceptInvitation = async (id: number) => {
     inviteProcessingId.value = id
     try {
-      await api.post(`/invitations/${id}/accept`)
+      await api.post(`/project/${id}/accept`)
       pendingInvitations.value = pendingInvitations.value.filter((i) => i.id !== id)
       await loadData()
     } catch (err: any) {
@@ -291,7 +291,7 @@ export function useProject() {
   const declineInvitation = async (id: number) => {
     inviteProcessingId.value = id
     try {
-      await api.post(`/invitations/${id}/decline`)
+      await api.post(`/project/${id}/decline`)
       pendingInvitations.value = pendingInvitations.value.filter((i) => i.id !== id)
     } catch (err: any) {
       console.error('Gagal menolak undangan:', err?.response?.data?.message)
