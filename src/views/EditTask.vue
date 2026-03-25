@@ -29,6 +29,8 @@
 			:eror="eror"
 			:submitting="submitting"
 			:priorities="priorities"
+			submit-label="Simpan Perubahan"
+			pending-label="Menyimpan..."
 			@submit="submitForm"
 			@cancel="goBack"
 			@update:form="Object.assign(form, $event)"
@@ -42,12 +44,17 @@
 		</p>
 	</CreateTaskShell>
 
-	<CreateTaskSuccessModal :show="showSuccess" @close="goBack" />
+	<CreateTaskSuccessModal
+		:show="showSuccess"
+		title="Task Berhasil Diperbarui!"
+		description="Perubahan task telah berhasil disimpan dan siap dilanjutkan ke halaman proyek."
+		@close="goBack"
+	/>
 </template>
 
 <script setup lang="ts">
 import { onMounted } from 'vue'
-import { useEditTask } from '@/composables/useEditTask'
+import { useEditTask } from '@/composables/useEditing'
 import CreateTaskShell from '@/components/CreateTaskShell.vue'
 import CreateTaskParentCard from '@/components/CreateTaskParentCard.vue'
 import CreateTaskFormCard from '@/components/CreateTaskFormCard.vue'

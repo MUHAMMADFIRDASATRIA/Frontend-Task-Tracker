@@ -68,7 +68,7 @@ import AppHeader from '@/components/AppHeader.vue'
 import ProfileSummaryCard from '@/components/ProfileSummaryCard.vue'
 import ProfileEditFormCard from '@/components/ProfileEditFormCard.vue'
 import ProfileDangerZone from '@/components/ProfileDangerZone.vue'
-import { useEditProfile } from '@/composables/useEditProfile'
+import { useEditProfile } from '@/composables/useEditing'
 
 const {
   user,

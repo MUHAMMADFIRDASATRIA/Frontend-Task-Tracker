@@ -10,8 +10,8 @@
             </svg>
           </div>
         </div>
-        <h3 class="modal-title">Task Ditambahkan!</h3>
-        <p class="modal-desc">Task baru telah berhasil dibuat dan dikaitkan dengan proyek.</p>
+        <h3 class="modal-title">{{ title }}</h3>
+        <p class="modal-desc">{{ description }}</p>
         <button @click="$emit('close')" class="modal-close-btn">
           Tutup &amp; Kembali
         </button>
@@ -21,7 +21,14 @@
 </template>
 
 <script setup lang="ts">
-defineProps<{ show: boolean }>()
+withDefaults(defineProps<{
+  show: boolean
+  title?: string
+  description?: string
+}>(), {
+  title: 'Task Berhasil Disimpan!',
+  description: 'Task telah berhasil disimpan dan dikaitkan dengan proyek.',
+})
 defineEmits<{ (e: 'close'): void }>()
 </script>
 

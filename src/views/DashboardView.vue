@@ -1,9 +1,10 @@
 <template>
   <div class="app-shell">
-    <AppSidebar :user="user" :user-initial="userInitial" @logout="handleLogout" />
+    <AppSidebar v-if="user" :user="user" :user-initial="userInitial" @logout="handleLogout" />
 
     <main class="main-content">
       <AppHeader
+        v-if ="user"
         :user="user"
         :user-initial="userInitial"
         :current-date="currentDate"
@@ -39,7 +40,8 @@ import AppHeader from '@/components/AppHeader.vue'
 import StatCard from '@/components/StatCard.vue'
 import ProgressCard from '@/components/ProgressCard.vue'
 import TaskTable from '@/components/TaskTable.vue'
-import { useDashboard } from '@/composables/useDashboard'
+// import { useDashboard } from '@/composables/useDashboard'
+import { useList } from '@/composables/useList'
 
 const router = useRouter()
 
@@ -55,12 +57,11 @@ const {
   completionPercent,
   currentDate,
   progressPercentage,
-  // progressProyek,
   progressTugas,
   progressPending,
   loadDashboard,
   handleLogout,
-} = useDashboard()
+} = useList()
 
 onMounted(loadDashboard)
 </script>

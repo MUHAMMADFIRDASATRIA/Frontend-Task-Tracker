@@ -22,7 +22,7 @@ import { useRoute } from 'vue-router'
 import EditProjectShell from '@/components/EditProjectShell.vue'
 import EditProjectHeading from '@/components/EditProjectHeading.vue'
 import EditProjectFormCard from '@/components/EditProjectFormCard.vue'
-import { useEditProject } from '@/composables/useEditProject'
+import { useEditProject } from '@/composables/useEditing'
 
 const route = useRoute()
 const projectId = String(route.params.id ?? '')

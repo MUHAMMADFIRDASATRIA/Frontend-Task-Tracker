@@ -1,9 +1,10 @@
 <template>
   <div class="app-shell">
-    <AppSidebar :user="user" :user-initial="userInitial" @logout="handleLogout" />
+    <AppSidebar v-if="user" :user="user" :user-initial="userInitial" @logout="handleLogout" />
 
     <main class="main-content">
       <AppHeader
+        v-if="user"
         :user="user"
         :user-initial="userInitial"
         :current-date="currentDate"
@@ -22,14 +23,14 @@
             </svg>
             Undangan<span v-if="pendingInvitations.length"> ({{ pendingInvitations.length }})</span>
           </button>
-          <!-- <button class="btn-join-outline" @click="showJoinModal = true">
+          <button class="btn-join-outline" @click="showJoinModal = true">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
               <polyline points="10 17 15 12 10 7"/>
               <line x1="15" y1="12" x2="3" y2="12"/>
             </svg>
             Gabung Proyek
-          </button> -->
+          </button>
           <RouterLink class="btn-primary" to="/projects/create">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
               <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
@@ -73,7 +74,7 @@
             :project="project"
             @click="goToProject(project.id)"
             @edit="handleEditProject"
-            @delete="handleDeleteProject"
+            @delete="(project) => confirmDeleteProject(project, fetchItems)"
             @manage-members="openMemberModal(project)"
           />
         </div>
@@ -105,7 +106,7 @@
       :invitations="pendingInvitations"
       :processing-id="inviteProcessingId"
       @close="closeInvitationModal"
-      @accept="acceptInvitation"
+      @accept="(id) => acceptInvitation(id, fetchItems)"
       @decline="declineInvitation"
     />
 
@@ -124,17 +125,41 @@
       :code-copied="codeCopied"
       :invite-user-id="inviteUserId"
       @close="closeMemberModal"
-      @invite="submitInvite"
-      @generate-code="submitGenerateCode"
+      @invite="() => submitInvite(selectedProject?.id)"
+      @generate-code="() => submitGenerateCode(selectedProject?.id)"
       @copy-code="copyCode"
       @kick="handleKick"
       @update:invite-user-id="inviteUserId = $event"
     />
+
+    <!-- Confirm Delete Modal -->
+    <Transition name="modal">
+      <div v-if="showDeleteConfirm" class="confirm-backdrop" @click.self="cancelDelete">
+        <div class="confirm-box">
+          <div class="confirm-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+              <path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <h3 class="confirm-title">Hapus Proyek?</h3>
+          <p class="confirm-desc">
+            Proyek <strong>"{{ itemToDelete?.title }}"</strong> beserta semua task-nya akan dihapus secara permanen dan tidak dapat dikembalikan.
+          </p>
+          <div class="confirm-actions">
+            <button class="btn-ghost" @click="cancelDelete" :disabled="deleteLoading">Batal</button>
+            <button class="btn-danger" @click="handleConfirmDelete" :disabled="deleteLoading">
+              {{ deleteLoading ? 'Menghapus...' : 'Ya, Hapus' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </Transition>
   </div>
 </template>
 
 <script setup lang="ts">
 import { onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import AppSidebar from '@/components/AppSidebar.vue'
 import AppHeader from '@/components/AppHeader.vue'
 import ProjectPageHeader from '@/components/ProjectPageHeader.vue'
@@ -144,33 +169,84 @@ import CreateProjectModal from '@/components/CreateProjectModal.vue'
 import Joinprojectmodal from '@/components/Joinprojectmodal.vue'
 import InvitationListModal from '@/components/InvitationListModal.vue'
 import Managemembersmodal from '@/components/Managemembersmodal.vue'
-import { useProject } from '@/composables/useProject'
+import { useList } from '@/composables/useList'
+import { useCreateProject } from '@/composables/useCreate'
+import { useDelete } from '@/composables/useDelete'
+import { useInvite } from '@/composables/useInvite'
+
+// const {
+//   showCreateModal,          // → ref(false) lokal
+//   creating,                 // → useCreateProject (loading)
+//   // userInitial,            // → useList
+//   // currentDate,            // → useList
+//   loadData,                 // → useInvite (loadData)
+//   handleCreateProject,      // → useCreateProject (handleSubmit)
+//   goToProject,              // → lokal (router.push)
+//   handleEditProject,        // → lokal (router.push)
+//   handleDeleteProject,      // → useDelete (deleteProject) + lokal wrapper
+//   // handleLogout,           // → useList
+//
+//   showJoinModal,            // → ref(false) lokal
+//   joinCode,                 // → useInvite
+//   joining,                  // → useInvite
+//   joinError,                // → useInvite
+//   submitJoin,               // → useInvite
+//
+//   showInvitationModal,      // → ref(false) lokal
+//   pendingInvitations,       // → useInvite
+//   loadingInvitations,       // → useInvite
+//   inviteProcessingId,       // → useInvite
+//   // openInvitationModal,    // → lokal
+//   // closeInvitationModal,   // → lokal
+//   acceptInvitation,         // → lokal
+//   declineInvitation,        // → lokal
+//
+//   // showMemberModal,        // → useList
+//   // selectedProject,        // → useList
+//   // memberList,             // → useList
+//   // loadingMembers,         // → useList
+//   inviteUserId,             // → useInvite
+//   inviting,                 // → useInvite
+//   inviteMessage,            // → useInvite
+//   inviteSuccess,            // → useInvite
+//   generatedCode,            // → useInvite
+//   generatingCode,           // → useInvite
+//   codeCopied,               // → useInvite
+//   // openMemberModal,        // → useList
+//   // closeMemberModal,       // → useList
+//   submitInvite,             // → useInvite
+//   submitGenerateCode,       // → useInvite
+//   copyCode,                 // → useInvite
+//   handleKick,               // → useInvite
+//   // openInvitationModal,   // → useList
+//   // closeInvitationModal,  // → useList
+// } = useProject()
+
+const router = useRouter()
+
+//pindahkan nanti
+const {
+  showCreateModal,
+  loading: creating,
+  handleSubmit: handleCreateProject,
+} = useCreateProject()
 
 const {
-  user,
-  loading,
-  search,
-  filterStatus,
-  showCreateModal,
-  creating,
-  filterTabs,
-  userInitial,
-  currentDate,
-  filteredProjects,
-  loadData,
-  handleCreateProject,
-  goToProject,
-  handleEditProject,
-  handleDeleteProject,
-  handleLogout,
+  loading: deleteLoading,
+  showDeleteConfirm,
+  itemToDelete,
+  confirmDeleteProject,
+  cancelDelete,
+  handleConfirmDelete,
+} = useDelete()
 
+const {
   showJoinModal,
+  showInvitationModal,
   joinCode,
   joining,
   joinError,
   submitJoin,
-
-  showInvitationModal,
   pendingInvitations,
   loadingInvitations,
   inviteProcessingId,
@@ -178,11 +254,6 @@ const {
   closeInvitationModal,
   acceptInvitation,
   declineInvitation,
-
-  showMemberModal,
-  selectedProject,
-  memberList,
-  loadingMembers,
   inviteUserId,
   inviting,
   inviteMessage,
@@ -190,15 +261,42 @@ const {
   generatedCode,
   generatingCode,
   codeCopied,
-  openMemberModal,
-  closeMemberModal,
   submitInvite,
   submitGenerateCode,
   copyCode,
-  handleKick,
-} = useProject()
+  handleKick: kickMember,
+} = useInvite()
 
-onMounted(loadData)
+const {
+  user,
+  userInitial,
+  currentDate,
+  loading,
+  search,
+  filterStatus,
+  filterTabs,
+  filteredProjects,
+  fetchItems,
+  showMemberModal,
+  selectedProject,
+  memberList,
+  loadingMembers,
+  openMemberModal,
+  closeMemberModal,
+  fetchMembers,
+  goToProject,
+  handleEditProject,
+  handleLogout,
+} = useList()
+
+const handleKick = (userId: number) => {
+  if (!selectedProject.value) return
+  kickMember(userId, selectedProject.value.id, () => fetchMembers(selectedProject.value!.id))
+}
+
+onMounted(() => {
+  fetchItems()
+})
 </script>
 
 <style scoped>
@@ -324,4 +422,97 @@ onMounted(loadData)
   opacity: 0.9;
   transform: translateY(-1px);
 }
+
+/* ── Confirm Delete Modal ── */
+.confirm-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.confirm-box {
+  background: #0f172a;
+  border-radius: 16px;
+  padding: 32px 28px;
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 4px 24px rgba(30, 58, 138, 0.3);
+  border-top: 4px solid #3b82f6;
+}
+
+.confirm-icon {
+  width: 64px;
+  height: 64px;
+  background: #1e3a8a;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+
+.confirm-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin-bottom: 10px;
+}
+
+.confirm-desc {
+  font-size: 0.9rem;
+  color: #94a3b8;
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
+
+.confirm-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.btn-ghost {
+  padding: 10px 22px;
+  border: 1.5px solid #334155;
+  background: transparent;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: #94a3b8;
+  transition: background 0.2s;
+}
+
+.btn-ghost:hover:not(:disabled) { background: #1e293b; }
+
+.btn-danger {
+  padding: 10px 22px;
+  background: #1e3a8a;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-danger:hover:not(:disabled) { background: #1e40af; }
+
+.btn-danger:disabled,
+.btn-ghost:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.modal-enter-active,
+.modal-leave-active { transition: opacity 0.2s ease; }
+
+.modal-enter-from,
+.modal-leave-to { opacity: 0; }
 </style>

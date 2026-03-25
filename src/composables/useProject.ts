@@ -1,458 +1,458 @@
-import { computed, ref } from 'vue'
-import { useRouter } from 'vue-router'
-import api from '@/services/api'
+// import { computed, ref } from 'vue'
+// import { useRouter } from 'vue-router'
+// import api from '@/services/api'
 
-interface ApiError {
-  response?: {
-    status?: number
-  }
-}
+// interface ApiError {
+//   response?: {
+//     status?: number
+//   }
+// }
 
-interface User {
-  id?: number
-  name?: string
-  [key: string]: unknown
-}
+// interface User {
+//   id?: number
+//   name?: string
+//   [key: string]: unknown
+// }
 
-interface Project {
-  id: number
-  title: string
-  description?: string
-  progress: number
-  deadline?: string
-  taskCount?: number
-  [key: string]: unknown
-}
+// interface Project {
+//   id: number
+//   title: string
+//   description?: string
+//   progress: number
+//   deadline?: string
+//   taskCount?: number
+//   [key: string]: unknown
+// }
 
-interface Task {
-  id: number
-  title?: string
-  description?: string
-  finish?: boolean
-  [key: string]: unknown
-}
+// interface Task {
+//   id: number
+//   title?: string
+//   description?: string
+//   finish?: boolean
+//   [key: string]: unknown
+// }
 
-export interface Invitation {
-  id: number
-  project_title: string
-  project_id: number
-  invited_by_name: string
-  created_at: string
-}
+// export interface Invitation {
+//   id: number
+//   project_title: string
+//   project_id: number
+//   invited_by_name: string
+//   created_at: string
+// }
 
-export interface ProjectMember {
-  id: number
-  user_id: number
-  role: 'leader' | 'member'
-  user?: { name?: string }
-}
+// export interface ProjectMember {
+//   id: number
+//   user_id: number
+//   role: 'leader' | 'member'
+//   user?: { name?: string }
+// }
 
-export interface ProjectWithRole extends Project {
-  role?: 'leader' | 'member'
-}
+// export interface ProjectWithRole extends Project {
+//   role?: 'leader' | 'member'
+// }
 
-interface CreateProjectPayload {
-  title: string
-  description: string
-  deadline: string
-}
+// interface CreateProjectPayload {
+//   title: string
+//   description: string
+//   deadline: string
+// }
 
-interface CreateProjectApiPayload {
-  title: string
-  description: string
-  tenggat: string
-}
+// interface CreateProjectApiPayload {
+//   title: string
+//   description: string
+//   tenggat: string
+// }
 
-export function useProject() {
-  const router = useRouter()
+// export function useProject() {
+//   const router = useRouter()
 
-  const user = ref<User>({})
-  const projects = ref<ProjectWithRole[]>([])
-  const loading = ref(true)
-  const search = ref('')
-  const filterStatus = ref('all')
-  const creating = ref(false)
+//   const user = ref<User>({})
+//   const projects = ref<ProjectWithRole[]>([])
+//   const loading = ref(true)
+//   const search = ref('')
+//   const filterStatus = ref('all')
+//   const creating = ref(false)
 
-  // ── Create Modal ──────────────────────────
-  const showCreateModal = ref(false)
+//   // ── Create Modal ──────────────────────────
+//   const showCreateModal = ref(false)
 
-  // ── Join Modal ────────────────────────────
-  const showJoinModal = ref(false)
-  const joinCode = ref('')
-  const joining = ref(false)
-  const joinError = ref('')
-  const joinSuccess = ref(false)
-  const joinedProjectName = ref('')
+//   // ── Join Modal ────────────────────────────
+//   const showJoinModal = ref(false)
+//   const joinCode = ref('')
+//   const joining = ref(false)
+//   const joinError = ref('')
+//   const joinSuccess = ref(false)
+//   const joinedProjectName = ref('')
 
-  // ── Member Modal ──────────────────────────
-  const showMemberModal = ref(false)
+//   // ── Member Modal ──────────────────────────
+//   const showMemberModal = ref(false)
 
-  // ── Invitation Modal ─────────────────────
-  const showInvitationModal = ref(false)
-  const pendingInvitations = ref<Invitation[]>([])
-  const loadingInvitations = ref(false)
-  const inviteProcessingId = ref<number | null>(null)
-  const selectedProject = ref<ProjectWithRole | null>(null)
-  const memberTab = ref<'invite' | 'code'>('invite')
-  const memberList = ref<ProjectMember[]>([])
-  const loadingMembers = ref(false)
-  const inviteUserId = ref('')
-  const inviting = ref(false)
-  const inviteMessage = ref('')
-  const inviteSuccess = ref(false)
+//   // ── Invitation Modal ─────────────────────
+//   const showInvitationModal = ref(false)
+//   const pendingInvitations = ref<Invitation[]>([])
+//   const loadingInvitations = ref(false)
+//   const inviteProcessingId = ref<number | null>(null)
+//   const selectedProject = ref<ProjectWithRole | null>(null)
+//   const memberTab = ref<'invite' | 'code'>('invite')
+//   const memberList = ref<ProjectMember[]>([])
+//   const loadingMembers = ref(false)
+//   const inviteUserId = ref('')
+//   const inviting = ref(false)
+//   const inviteMessage = ref('')
+//   const inviteSuccess = ref(false)
   
-  const generatedCode = ref('')
-  const generatingCode = ref(false)
-  const codeCopied = ref(false)
+//   const generatedCode = ref('')
+//   const generatingCode = ref(false)
+//   const codeCopied = ref(false)
 
-  const filterTabs = [
-    { label: 'Semua', value: 'all' },
-    { label: 'Berjalan', value: 'progress' },
-    { label: 'Selesai', value: 'completed' },
-  ]
+//   const filterTabs = [
+//     { label: 'Semua', value: 'all' },
+//     { label: 'Berjalan', value: 'progress' },
+//     { label: 'Selesai', value: 'completed' },
+//   ]
 
-  const userInitial = computed(() =>
-    user.value?.name ? user.value.name.charAt(0).toUpperCase() : 'A',
-  )
+//   const userInitial = computed(() =>
+//     user.value?.name ? user.value.name.charAt(0).toUpperCase() : 'A',
+//   )
 
-  const currentDate = computed(() =>
-    new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' }),
-  )
+//   const currentDate = computed(() =>
+//     new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' }),
+//   )
 
-  const filteredProjects = computed(() =>
-    projects.value
-      .filter((p) =>
-        filterStatus.value === 'all'
-          ? true
-          : filterStatus.value === 'completed'
-            ? p.progress === 100
-            : p.progress < 100,
-      )
-      .filter((p) => p.title.toLowerCase().includes(search.value.toLowerCase())),
-  )
+//   const filteredProjects = computed(() =>
+//     projects.value
+//       .filter((p) =>
+//         filterStatus.value === 'all'
+//           ? true
+//           : filterStatus.value === 'completed'
+//             ? p.progress === 100
+//             : p.progress < 100,
+//       )
+//       .filter((p) => p.title.toLowerCase().includes(search.value.toLowerCase())),
+//   )
 
-  // ── Load Data ─────────────────────────────
-  const loadData = async () => {
-    loading.value = true
-    try {
-      const results = await Promise.allSettled([
-        api.get('/profile/show'),
-        api.get('/project/show'),
-        api.get('/invitations/show'),
-      ])
+//   // ── Load Data ─────────────────────────────
+//   const loadData = async () => {
+//     loading.value = true
+//     try {
+//       const results = await Promise.allSettled([
+//         api.get('/profile/show'),
+//         api.get('/project/show'),
+//         api.get('/invitations/show'),
+//       ])
 
-      const profileRes = results[0].status === 'fulfilled' ? (results[0] as PromiseFulfilledResult<any>).value : null
-      const projectRes = results[1].status === 'fulfilled' ? (results[1] as PromiseFulfilledResult<any>).value : null
-      const inviteRes  = results[2].status === 'fulfilled' ? (results[2] as PromiseFulfilledResult<any>).value : null
+//       const profileRes = results[0].status === 'fulfilled' ? (results[0] as PromiseFulfilledResult<any>).value : null
+//       const projectRes = results[1].status === 'fulfilled' ? (results[1] as PromiseFulfilledResult<any>).value : null
+//       const inviteRes  = results[2].status === 'fulfilled' ? (results[2] as PromiseFulfilledResult<any>).value : null
 
-      if (profileRes) {
-        user.value = (profileRes.data?.data as User) ?? {}
-      } else {
-        user.value = {}
-        console.error('Gagal memuat profile:', (results[0] as PromiseRejectedResult).reason)
-      }
+//       if (profileRes) {
+//         user.value = (profileRes.data?.data as User) ?? {}
+//       } else {
+//         user.value = {}
+//         console.error('Gagal memuat profile:', (results[0] as PromiseRejectedResult).reason)
+//       }
 
-      pendingInvitations.value = inviteRes && Array.isArray(inviteRes.data?.data)
-        ? inviteRes.data.data
-        : []
+//       pendingInvitations.value = inviteRes && Array.isArray(inviteRes.data?.data)
+//         ? inviteRes.data.data
+//         : []
 
-      const raw: Array<Record<string, unknown>> = projectRes && Array.isArray(projectRes.data?.data)
-        ? projectRes.data.data
-        : []
+//       const raw: Array<Record<string, unknown>> = projectRes && Array.isArray(projectRes.data?.data)
+//         ? projectRes.data.data
+//         : []
 
-      if (!projectRes) {
-        console.error('Gagal memuat daftar proyek:', (results[1] as PromiseRejectedResult).reason)
-      }
+//       if (!projectRes) {
+//         console.error('Gagal memuat daftar proyek:', (results[1] as PromiseRejectedResult).reason)
+//       }
 
-      const enriched: ProjectWithRole[] = await Promise.all(
-        raw.map(async (p) => {
-          try {
-            const [taskRes, memberRes] = await Promise.all([
-              api.get(`/tasks/show?project_id=${p.id}`),
-              api.get(`/members/show?project_id=${p.id}`),
-            ])
+//       const enriched: ProjectWithRole[] = await Promise.all(
+//         raw.map(async (p) => {
+//           try {
+//             const [taskRes, memberRes] = await Promise.all([
+//               api.get(`/tasks/show?project_id=${p.id}`),
+//               api.get(`/members/show?project_id=${p.id}`),
+//             ])
 
-            const tasks: Task[] = Array.isArray(taskRes.data?.data) ? taskRes.data.data : []
-            const done = tasks.filter((t) => t.finish).length
-            const members: ProjectMember[] = Array.isArray(memberRes.data?.data)
-              ? memberRes.data.data
-              : []
+//             const tasks: Task[] = Array.isArray(taskRes.data?.data) ? taskRes.data.data : []
+//             const done = tasks.filter((t) => t.finish).length
+//             const members: ProjectMember[] = Array.isArray(memberRes.data?.data)
+//               ? memberRes.data.data
+//               : []
 
-            const myMember = members.find((m) => Number(m.user_id) === Number(user.value.id))
-            return {
-              ...p,
-              deadline: String((p as { tenggat?: unknown }).tenggat ?? ''),
-              progress: tasks.length > 0 ? Math.round((done / tasks.length) * 100) : 0,
-              taskCount: tasks.length,
-              role: myMember?.role ?? 'member',
-            } as ProjectWithRole
-          } catch {
-            return {
-              ...(p as ProjectWithRole),
-              deadline: String((p as { tenggat?: unknown }).tenggat ?? ''),
-              progress: Number((p as { progress?: number }).progress ?? 0),
-              taskCount: 0,
-              role: 'member' as const,
-            }
-          }
-        }),
-      )
+//             const myMember = members.find((m) => Number(m.user_id) === Number(user.value.id))
+//             return {
+//               ...p,
+//               deadline: String((p as { tenggat?: unknown }).tenggat ?? ''),
+//               progress: tasks.length > 0 ? Math.round((done / tasks.length) * 100) : 0,
+//               taskCount: tasks.length,
+//               role: myMember?.role ?? 'member',
+//             } as ProjectWithRole
+//           } catch {
+//             return {
+//               ...(p as ProjectWithRole),
+//               deadline: String((p as { tenggat?: unknown }).tenggat ?? ''),
+//               progress: Number((p as { progress?: number }).progress ?? 0),
+//               taskCount: 0,
+//               role: 'member' as const,
+//             }
+//           }
+//         }),
+//       )
 
-      projects.value = enriched
-    } catch (err: unknown) {
-      if ((err as ApiError).response?.status !== 401) {
-        console.error('Gagal memuat proyek:', err)
-      }
-    } finally {
-      loading.value = false
-    }
-  }
+//       projects.value = enriched
+//     } catch (err: unknown) {
+//       if ((err as ApiError).response?.status !== 401) {
+//         console.error('Gagal memuat proyek:', err)
+//       }
+//     } finally {
+//       loading.value = false
+//     }
+//   }
 
-  // ── Create Project ────────────────────────
-  const handleCreateProject = async (data: CreateProjectPayload) => {
-    creating.value = true
-    try {
-      const payload: CreateProjectApiPayload = {
-        title: data.title,
-        description: data.description,
-        tenggat: data.deadline,
-      }
-      await api.post('/project/create', payload)
-      showCreateModal.value = false
-      await loadData()
-    } catch (err: unknown) {
-      console.error('Gagal membuat proyek:', err)
-    } finally {
-      creating.value = false
-    }
-  }
+//   // ── Create Project ────────────────────────
+//   const handleCreateProject = async (data: CreateProjectPayload) => {
+//     creating.value = true
+//     try {
+//       const payload: CreateProjectApiPayload = {
+//         title: data.title,
+//         description: data.description,
+//         tenggat: data.deadline,
+//       }
+//       await api.post('/project/create', payload)
+//       showCreateModal.value = false
+//       await loadData()
+//     } catch (err: unknown) {
+//       console.error('Gagal membuat proyek:', err)
+//     } finally {
+//       creating.value = false
+//     }
+//   }
 
-  // ── Join Project ──────────────────────────
-  const submitJoin = async () => {
-    if (joinCode.value.length < 8) return
-    joining.value = true
-    joinError.value = ''
-    joinSuccess.value = false
-    try {
-      const res = await api.post('/project/me/join', { code: joinCode.value })
-      joinSuccess.value = true
-      joinedProjectName.value = res.data?.data?.project_title ?? ''
-      await loadData()
-    } catch (err: any) {
-      joinError.value = err?.response?.data?.message ?? 'Kode tidak valid atau sudah kadaluarsa.'
-    } finally {
-      joining.value = false
-    }
-  }
+//   // ── Join Project ──────────────────────────
+//   const submitJoin = async () => {
+//     if (joinCode.value.length < 8) return
+//     joining.value = true
+//     joinError.value = ''
+//     joinSuccess.value = false
+//     try {
+//       const res = await api.post('/project/me/join', { code: joinCode.value })
+//       joinSuccess.value = true
+//       joinedProjectName.value = res.data?.data?.project_title ?? ''
+//       await loadData()
+//     } catch (err: any) {
+//       joinError.value = err?.response?.data?.message ?? 'Kode tidak valid atau sudah kadaluarsa.'
+//     } finally {
+//       joining.value = false
+//     }
+//   }
 
-  const closeJoinModal = () => {
-    showJoinModal.value = false
-    joinCode.value = ''
-    joinError.value = ''
-    joinSuccess.value = false
-    joinedProjectName.value = ''
-  }
+//   const closeJoinModal = () => {
+//     showJoinModal.value = false
+//     joinCode.value = ''
+//     joinError.value = ''
+//     joinSuccess.value = false
+//     joinedProjectName.value = ''
+//   }
 
-  // ── Invitation actions ────────────────────
-  const fetchInvitations = async () => {
-    loadingInvitations.value = true
-    try {
-      const res = await api.get('/invitations/show')
-      pendingInvitations.value = Array.isArray(res.data?.data) ? res.data.data : []
-    } catch {
-      pendingInvitations.value = []
-    } finally {
-      loadingInvitations.value = false
-    }
-  }
+//   // ── Invitation actions ────────────────────
+//   const fetchInvitations = async () => {
+//     loadingInvitations.value = true
+//     try {
+//       const res = await api.get('/invitations/show')
+//       pendingInvitations.value = Array.isArray(res.data?.data) ? res.data.data : []
+//     } catch {
+//       pendingInvitations.value = []
+//     } finally {
+//       loadingInvitations.value = false
+//     }
+//   }
 
-  const openInvitationModal = async () => {
-    showInvitationModal.value = true
-    await fetchInvitations()
-  }
+//   const openInvitationModal = async () => {
+//     showInvitationModal.value = true
+//     await fetchInvitations()
+//   }
 
-  const closeInvitationModal = () => {
-    showInvitationModal.value = false
-  }
+//   const closeInvitationModal = () => {
+//     showInvitationModal.value = false
+//   }
 
-  const acceptInvitation = async (id: number) => {
-    inviteProcessingId.value = id
-    try {
-      await api.post(`/project/${id}/accept`)
-      pendingInvitations.value = pendingInvitations.value.filter((i) => i.id !== id)
-      await loadData()
-    } catch (err: any) {
-      console.error('Gagal menerima undangan:', err?.response?.data?.message)
-    } finally {
-      inviteProcessingId.value = null
-    }
-  }
+//   const acceptInvitation = async (id: number) => {
+//     inviteProcessingId.value = id
+//     try {
+//       await api.post(`/project/${id}/accept`)
+//       pendingInvitations.value = pendingInvitations.value.filter((i) => i.id !== id)
+//       await loadData()
+//     } catch (err: any) {
+//       console.error('Gagal menerima undangan:', err?.response?.data?.message)
+//     } finally {
+//       inviteProcessingId.value = null
+//     }
+//   }
 
-  const declineInvitation = async (id: number) => {
-    inviteProcessingId.value = id
-    try {
-      await api.post(`/project/${id}/decline`)
-      pendingInvitations.value = pendingInvitations.value.filter((i) => i.id !== id)
-    } catch (err: any) {
-      console.error('Gagal menolak undangan:', err?.response?.data?.message)
-    } finally {
-      inviteProcessingId.value = null
-    }
-  }
+//   const declineInvitation = async (id: number) => {
+//     inviteProcessingId.value = id
+//     try {
+//       await api.post(`/project/${id}/decline`)
+//       pendingInvitations.value = pendingInvitations.value.filter((i) => i.id !== id)
+//     } catch (err: any) {
+//       console.error('Gagal menolak undangan:', err?.response?.data?.message)
+//     } finally {
+//       inviteProcessingId.value = null
+//     }
+//   }
 
-  // ── Member Modal ──────────────────────────
-  const openMemberModal = async (project: ProjectWithRole) => {
-    selectedProject.value = project
-    memberTab.value = 'invite'
-    inviteUserId.value = ''
-    inviteMessage.value = ''
-    generatedCode.value = ''
-    codeCopied.value = false
-    showMemberModal.value = true
-    await fetchMembers(project.id)
-  }
+//   // ── Member Modal ──────────────────────────
+//   const openMemberModal = async (project: ProjectWithRole) => {
+//     selectedProject.value = project
+//     memberTab.value = 'invite'
+//     inviteUserId.value = ''
+//     inviteMessage.value = ''
+//     generatedCode.value = ''
+//     codeCopied.value = false
+//     showMemberModal.value = true
+//     await fetchMembers(project.id)
+//   }
 
-  const closeMemberModal = () => {
-    showMemberModal.value = false
-    selectedProject.value = null
-    memberList.value = []
-  }
+//   const closeMemberModal = () => {
+//     showMemberModal.value = false
+//     selectedProject.value = null
+//     memberList.value = []
+//   }
 
-  const fetchMembers = async (projectId: number) => {
-    loadingMembers.value = true
-    try {
-      const res = await api.get(`/members/show?project_id=${projectId}`)
-      memberList.value = Array.isArray(res.data?.data) ? res.data.data : []
-    } catch {
-      memberList.value = []
-    } finally {
-      loadingMembers.value = false
-    }
-  }
+//   const fetchMembers = async (projectId: number) => {
+//     loadingMembers.value = true
+//     try {
+//       const res = await api.get(`/members/show?project_id=${projectId}`)
+//       memberList.value = Array.isArray(res.data?.data) ? res.data.data : []
+//     } catch {
+//       memberList.value = []
+//     } finally {
+//       loadingMembers.value = false
+//     }
+//   }
 
-  const submitInvite = async () => {
-    if (!inviteUserId.value.trim() || !selectedProject.value) return
-    inviting.value = true
-    inviteMessage.value = ''
-    try {
-      await api.post(`/project/${selectedProject.value.id}/invite`, {
-        user_id: inviteUserId.value,
-      })
-      inviteMessage.value = 'Undangan berhasil dikirim!'
-      inviteSuccess.value = true
-      inviteUserId.value = ''
-    } catch {
-      inviteMessage.value = 'Gagal mengirim undangan. Periksa User ID.'
-      inviteSuccess.value = false
-    } finally {
-      inviting.value = false
-    }
-  }
+//   const submitInvite = async () => {
+//     if (!inviteUserId.value.trim() || !selectedProject.value) return
+//     inviting.value = true
+//     inviteMessage.value = ''
+//     try {
+//       await api.post(`/project/${selectedProject.value.id}/invite`, {
+//         user_id: inviteUserId.value,
+//       })
+//       inviteMessage.value = 'Undangan berhasil dikirim!'
+//       inviteSuccess.value = true
+//       inviteUserId.value = ''
+//     } catch {
+//       inviteMessage.value = 'Gagal mengirim undangan. Periksa User ID.'
+//       inviteSuccess.value = false
+//     } finally {
+//       inviting.value = false
+//     }
+//   }
 
-  const submitGenerateCode = async () => {
-    if (!selectedProject.value) return
-    generatingCode.value = true
-    try {
-      const res = await api.post(`/project/${selectedProject.value.id}/generateCode`)
-      generatedCode.value = res.data?.data?.code ?? ''
-      codeCopied.value = false
-    } catch {
-      //
-    } finally {
-      generatingCode.value = false
-    }
-  }
+//   const submitGenerateCode = async () => {
+//     if (!selectedProject.value) return
+//     generatingCode.value = true
+//     try {
+//       const res = await api.post(`/project/${selectedProject.value.id}/generateCode`)
+//       generatedCode.value = res.data?.data?.code ?? ''
+//       codeCopied.value = false
+//     } catch {
+//       //
+//     } finally {
+//       generatingCode.value = false
+//     }
+//   }
 
-  const copyCode = async () => {
-    if (!generatedCode.value) return
-    await navigator.clipboard.writeText(generatedCode.value)
-    codeCopied.value = true
-    setTimeout(() => (codeCopied.value = false), 2000)
-  }
+//   const copyCode = async () => {
+//     if (!generatedCode.value) return
+//     await navigator.clipboard.writeText(generatedCode.value)
+//     codeCopied.value = true
+//     setTimeout(() => (codeCopied.value = false), 2000)
+//   }
 
-  const handleKick = async (userId: number) => {
-    if (!selectedProject.value) return
-    const confirmed = window.confirm('Keluarkan anggota ini dari proyek?')
-    if (!confirmed) return
-    try {
-      await api.delete(`/members/${userId}?project_id=${selectedProject.value.id}`)
-      memberList.value = memberList.value.filter((m) => m.user_id !== userId)
-    } catch {
-      //
-    }
-  }
+//   const handleKick = async (userId: number) => {
+//     if (!selectedProject.value) return
+//     const confirmed = window.confirm('Keluarkan anggota ini dari proyek?')
+//     if (!confirmed) return
+//     try {
+//       await api.delete(`/members/${userId}?project_id=${selectedProject.value.id}`)
+//       memberList.value = memberList.value.filter((m) => m.user_id !== userId)
+//     } catch {
+//       //
+//     }
+//   }
 
-  // ── Project Actions ───────────────────────
-  const goToProject = (id: number) => router.push(`/projects/${id}`)
-  const handleEditProject = (id: number) => router.push(`/projects/${id}/edit`)
+//   // ── Project Actions ───────────────────────
+//   const goToProject = (id: number) => router.push(`/projects/${id}`)
+//   const handleEditProject = (id: number) => router.push(`/projects/${id}/edit`)
 
-  const handleDeleteProject = async (id: number) => {
-    const confirmed = window.confirm('Hapus proyek ini? Tindakan ini tidak bisa dibatalkan.')
-    if (!confirmed) return
-    try {
-      await api.delete(`/project/${id}`)
-      projects.value = projects.value.filter((project) => project.id !== id)
-    } catch (err: unknown) {
-      console.error('Gagal menghapus proyek:', err)
-    }
-  }
+//   const handleDeleteProject = async (id: number) => {
+//     const confirmed = window.confirm('Hapus proyek ini? Tindakan ini tidak bisa dibatalkan.')
+//     if (!confirmed) return
+//     try {
+//       await api.delete(`/project/${id}`)
+//       projects.value = projects.value.filter((project) => project.id !== id)
+//     } catch (err: unknown) {
+//       console.error('Gagal menghapus proyek:', err)
+//     }
+//   }
 
-  const handleLogout = () => {
-    localStorage.removeItem('token')
-    router.push('/')
-  }
+//   const handleLogout = () => {
+//     localStorage.removeItem('token')
+//     router.push('/')
+//   }
 
-  return {
-    user,
-    projects,
-    loading,
-    search,
-    filterStatus,
-    creating,
-    showCreateModal,
-    showJoinModal,
-    joinCode,
-    joining,
-    joinError,
-    joinSuccess,
-    joinedProjectName,
-    closeJoinModal,
-    showInvitationModal,
-    pendingInvitations,
-    loadingInvitations,
-    inviteProcessingId,
-    openInvitationModal,
-    closeInvitationModal,
-    acceptInvitation,
-    declineInvitation,
-    showMemberModal,
-    selectedProject,
-    memberTab,
-    memberList,
-    loadingMembers,
-    inviteUserId,
-    inviting,
-    inviteMessage,
-    inviteSuccess,
-    generatedCode,
-    generatingCode,
-    codeCopied,
-    filterTabs,
-    userInitial,
-    currentDate,
-    filteredProjects,
-    loadData,
-    handleCreateProject,
-    goToProject,
-    handleEditProject,
-    handleDeleteProject,
-    handleLogout,
-    copyCode,
-    handleKick,
-    submitJoin,
-    openMemberModal,
-    closeMemberModal,
-    submitInvite,
-    submitGenerateCode,
-  }
-}
+//   return {
+//     user,
+//     projects,
+//     loading,
+//     search,
+//     filterStatus,
+//     creating,
+//     showCreateModal,
+//     showJoinModal,
+//     joinCode,
+//     joining,
+//     joinError,
+//     joinSuccess,
+//     joinedProjectName,
+//     closeJoinModal,
+//     showInvitationModal,
+//     pendingInvitations,
+//     loadingInvitations,
+//     inviteProcessingId,
+//     openInvitationModal,
+//     closeInvitationModal,
+//     acceptInvitation,
+//     declineInvitation,
+//     showMemberModal,
+//     selectedProject,
+//     memberTab,
+//     memberList,
+//     loadingMembers,
+//     inviteUserId,
+//     inviting,
+//     inviteMessage,
+//     inviteSuccess,
+//     generatedCode,
+//     generatingCode,
+//     codeCopied,
+//     filterTabs,
+//     userInitial,
+//     currentDate,
+//     filteredProjects,
+//     loadData,
+//     handleCreateProject,
+//     goToProject,
+//     handleEditProject,
+//     handleDeleteProject,
+//     handleLogout,
+//     copyCode,
+//     handleKick,
+//     submitJoin,
+//     openMemberModal,
+//     closeMemberModal,
+//     submitInvite,
+//     submitGenerateCode,
+//   }
+// }

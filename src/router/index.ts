@@ -22,7 +22,7 @@ const routes = [
   },
   {
     path:"/projects",
-    name:"halo",
+    name:"projects",
     component: () => import("@/views/ProjectView.vue"),
     meta: { requiresAuth: true },
   },

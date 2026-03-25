@@ -17,7 +17,7 @@ import { onMounted } from 'vue'
 import CreateProjectShell from '@/components/CreateProjectShell.vue'
 import CreateProjectHeading from '@/components/CreateProjectHeading.vue'
 import CreateProjectFormCard from '@/components/CreateProjectFormCard.vue'
-import { useCreateProject } from '@/composables/useCreateProject'
+import { useCreateProject } from '@/composables/useCreate'
 
 const {
   form,

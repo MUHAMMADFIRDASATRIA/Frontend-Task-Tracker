@@ -37,6 +37,13 @@
       </div>
     </div>
 
+    <div v-if="deadlineWarning(project)" class="deadline-warning">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+        <path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      {{ deadlineWarning(project) }}
+    </div>
+
     <div class="card-footer">
       <div class="meta-item">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
@@ -64,7 +71,7 @@
         Anggota
       </button>
       <button class="btn-action btn-edit" @click.stop="$emit('edit', project.id)">Edit</button>
-      <button class="btn-action btn-delete" @click.stop="$emit('delete', project.id)">Hapus</button>
+      <button class="btn-action btn-delete" @click.stop="$emit('delete', project)">Hapus</button>
     </div>
   </div>
 </template>
@@ -78,6 +85,7 @@ interface Project {
   deadline?: string
   taskCount?: number
   role?: 'leader' | 'member'
+  [key: string]: unknown
 }
 
 defineProps<{
@@ -87,12 +95,25 @@ defineProps<{
 defineEmits<{
   (e: 'click', id: number): void
   (e: 'edit', id: number): void
-  (e: 'delete', id: number): void
+  (e: 'delete', project: Project): void
   (e: 'manage-members', project: Project): void
 }>()
 
 const statusClass = (p: Project) => (p.progress === 100 ? 'badge-green' : 'badge-blue')
 const statusLabel = (p: Project) => (p.progress === 100 ? 'Selesai' : 'Berjalan')
+
+const deadlineWarning = (p: Project): string | null => {
+  if (!p.deadline) return null
+  const now = new Date()
+  now.setHours(0, 0, 0, 0)
+  const dl = new Date(p.deadline)
+  dl.setHours(0, 0, 0, 0)
+  const diff = Math.ceil((dl.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+  if (diff < 0) return 'Deadline telah lewat!'
+  if (diff === 0) return 'Deadline hari ini!'
+  if (diff <= 7) return `Deadline ${diff} hari lagi!`
+  return null
+}
 
 const formatDate = (date?: string) => {
   if (!date) return '—'
@@ -121,6 +142,25 @@ const formatDate = (date?: string) => {
   border-color: rgba(99, 102, 241, 0.3);
   transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.deadline-warning {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 12px;
+  border-radius: 8px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #f87171;
+  font-size: 0.75rem;
+  font-weight: 700;
+  animation: pulse-border 2s ease-in-out infinite;
+}
+
+@keyframes pulse-border {
+  0%, 100% { border-color: rgba(239, 68, 68, 0.3); }
+  50%       { border-color: rgba(239, 68, 68, 0.7); }
 }
 
 .card-top {

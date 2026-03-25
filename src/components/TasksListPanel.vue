@@ -115,7 +115,7 @@ interface TaskItem {
   id: number
   title?: string
   description?: string
-  priority?: string
+  priority?: string | number
   finish?: boolean
   [key: string]: unknown
 }

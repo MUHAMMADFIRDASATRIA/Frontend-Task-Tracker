@@ -154,7 +154,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 
-interface ProjectMember {
+interface members {
   id: number
   user_id: number
   role: 'leader' | 'member'
@@ -164,7 +164,7 @@ interface ProjectMember {
 const props = defineProps<{
   show: boolean
   projectTitle?: string
-  members: ProjectMember[]
+  members: members[]
   loadingMembers: boolean
   isLeader: boolean        // ✅ prop baru
   inviting: boolean
